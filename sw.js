@@ -1,23 +1,17 @@
-// Robust PWA Service Worker for GitHub Pages
-// - caches core files
-// - DOES NOT fail installation if one asset 404s
-// - cleans up old caches
-// - serves cache-first with network fallback
+// Zeit PWA Service Worker (robust, SVG-first, caches favicon)
+// - Install never fails if one asset 404s
+// - Cleans old caches
+// - Cache-first for same-origin, network fallback
+// - Offline fallback to index.html for navigations
 
-const CACHE = "zeit-pwa-20260227-1";
+const CACHE = "zeit-pwa-20260227-svg-2";
 
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./manifest.webmanifest",
-
-  // Icons (these SHOULD exist; if not, install still succeeds)
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
   "./icons/icon.svg",
-
-  // Optional: if you later add it, it will be cached
   "./favicon.ico"
 ];
 
@@ -25,17 +19,9 @@ self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
 
-    // Important: Promise.allSettled makes install robust.
-    // Even if one request fails (404), the service worker still installs.
+    // Do not fail the whole install if a single file fails (404, etc.)
     await Promise.allSettled(
-      ASSETS.map(async (url) => {
-        try {
-          // Use Request with cache: 'reload' to avoid stale HTTP cache
-          await cache.add(new Request(url, { cache: "reload" }));
-        } catch (err) {
-          // Ignore single asset failures
-        }
-      })
+      ASSETS.map((url) => cache.add(new Request(url, { cache: "reload" })))
     );
 
     self.skipWaiting();
@@ -44,10 +30,8 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
-    // Remove old caches
     const keys = await caches.keys();
-    await Promise.all(keys.map((k) => (k !== CACHE ? caches.delete(k) : Promise.resolve())));
-
+    await Promise.all(keys.map((k) => (k !== CACHE ? caches.delete(k) : null)));
     self.clients.claim();
   })());
 });
@@ -55,10 +39,11 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // Only handle GET
+  // Only handle GET requests
   if (req.method !== "GET") return;
 
   event.respondWith((async () => {
+    // Cache-first
     const cached = await caches.match(req);
     if (cached) return cached;
 
@@ -74,7 +59,7 @@ self.addEventListener("fetch", (event) => {
 
       return res;
     } catch (err) {
-      // Offline fallback: give cached index.html for navigation requests
+      // Offline fallback for page navigations
       if (req.mode === "navigate") {
         const fallback = await caches.match("./index.html");
         if (fallback) return fallback;
