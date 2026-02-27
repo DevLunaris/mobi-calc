@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#0b0f14" />
-  <title>Zeit – Work & Mobi</title>
+  <meta name="theme-color" content="#1f232a" />
+  <title>Zeit</title>
 
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -14,18 +14,18 @@
   <header class="top">
     <div class="top__left">
       <div class="brand">ZEIT</div>
-      <div class="bigclock mono" id="bigClock">--:--:--</div>
-      <div class="subline" id="todayLine">—</div>
+      <div class="clock mono" id="bigClock">--:--:--</div>
+      <div class="date" id="todayLine">—</div>
     </div>
 
     <div class="top__right">
-      <div class="row wrap">
-        <div class="seg">
-          <button class="seg__btn is-active" id="tabNormal">Normal</button>
-          <button class="seg__btn" id="tabMobi">Mobi</button>
-        </div>
+      <div class="tabs" role="tablist" aria-label="Modus">
+        <button class="tab is-active" id="tabNormal" type="button">Normal</button>
+        <button class="tab" id="tabMobi" type="button">Mobi</button>
+      </div>
 
-        <label class="field field--inline">
+      <div class="toolbar">
+        <label class="select">
           <span>Theme</span>
           <select id="themeSel">
             <option value="dark">Dark</option>
@@ -34,55 +34,54 @@
           </select>
         </label>
 
-        <button class="btn btn--ghost" id="btnInstall" style="display:none">Als App installieren</button>
+        <button class="btn btn--ghost" id="btnInstall" style="display:none" type="button">Installieren</button>
       </div>
     </div>
   </header>
 
   <main class="container">
 
-    <!-- HERO: big work timer + main controls -->
+    <!-- HERO -->
     <section class="card hero">
-      <div class="hero__grid">
-        <div>
-          <div class="hero__label">Arbeitszeit heute</div>
-          <div class="hero__big mono" id="heroWork">00:00:00</div>
-          <div class="hero__sub mono" id="heroSub">Pause 00:00:00 · Unterbr. 00:00:00</div>
+      <div class="hero__main">
+        <div class="kicker">Arbeitszeit heute</div>
+        <div class="timebig mono" id="heroWork">00:00:00</div>
+        <div class="sub mono" id="heroSub">Pause 00:00:00 · Unterbr. 00:00:00</div>
 
-          <div class="row wrap hero__actions">
-            <button class="btn btn--good btn--xl" id="workStart">Start</button>
-            <button class="btn btn--warn btn--xl" id="workPause">Pause</button>
-            <button class="btn btn--danger btn--xl" id="workStop">Stop</button>
-          </div>
-
-          <div class="hint">
-            Pause startet <b>nur</b>, wenn du Pause drückst. Wenn Arbeit pausiert ist und keine Pause läuft, wird <b>Unterbrechung</b> getrackt.
-          </div>
+        <div class="actions">
+          <button class="btn btn--good btn--xl" id="workStart" type="button">Start</button>
+          <button class="btn btn--warn btn--xl" id="workPause" type="button">Pause</button>
+          <button class="btn btn--danger btn--xl" id="workStop" type="button">Stop</button>
         </div>
 
-        <div class="hero__right">
-          <div class="pill">
-            <div class="pill__label">Status Arbeit</div>
-            <div class="pill__value mono" id="workStatus">stopped</div>
-          </div>
-          <div class="pill">
-            <div class="pill__label">Status Pause</div>
-            <div class="pill__value mono" id="breakStatus">stopped</div>
-          </div>
-
-          <div class="pill">
-            <div class="pill__label">Geplantes Ende (live)</div>
-            <div class="pill__value mono" id="endTime">—</div>
-            <div class="pill__sub mono" id="endSub">—</div>
-          </div>
-
-          <button class="btn btn--primary" id="btnFinishDay">Arbeitsende</button>
-          <div class="mono small" id="finishResult">—</div>
-        </div>
+        <p class="hint">
+          „Pause“ pausiert Arbeit. Wenn du im Mobi-Tab Pause drückst, startet zusätzlich die echte Pause (für 2-Tap-Flow).
+        </p>
       </div>
+
+      <aside class="hero__side">
+        <div class="stat">
+          <div class="stat__label">Status</div>
+          <div class="stat__value mono" id="workStatus">stopped</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat__label">Pause</div>
+          <div class="stat__value mono" id="breakStatus">stopped</div>
+        </div>
+
+        <div class="stat stat--big">
+          <div class="stat__label">Geplantes Ende</div>
+          <div class="stat__value mono" id="endTime">—</div>
+          <div class="stat__sub mono" id="endSub">—</div>
+        </div>
+
+        <button class="btn btn--primary" id="btnFinishDay" type="button">Arbeitsende</button>
+        <div class="mini mono" id="finishResult">—</div>
+      </aside>
     </section>
 
-    <!-- NORMAL TAB -->
+    <!-- NORMAL -->
     <section id="viewNormal">
 
       <section class="card">
@@ -92,15 +91,12 @@
           <label class="field">
             <span>Startzeit</span>
             <input type="time" id="dayStart" step="60" lang="de-DE" />
-            <small class="small">
-              Falls am Laptop AM/PM erscheint: einmal AM oder PM auswählen (sonst bleibt es “--”).
-            </small>
+            <small>Wenn AM/PM sichtbar: einmal AM/PM auswählen, sonst bleibt “--”.</small>
           </label>
 
           <label class="field">
-            <span>Soll-Arbeitszeit</span>
+            <span>Soll (ohne Pause)</span>
             <input type="time" id="targetWork" value="07:00" step="60" />
-            <small class="small">Nur Arbeitszeit (ohne Pause).</small>
           </label>
 
           <label class="field">
@@ -110,24 +106,27 @@
 
           <div class="field">
             <span>Quick</span>
-            <button class="btn btn--primary btn--shine" id="btnStartNow">Start = jetzt & sofort starten</button>
-            <div class="row wrap" style="margin-top:10px">
-              <label class="check">
+            <button class="btn btn--primary btn--callout" id="btnStartNow" type="button">
+              Start=jetzt & starten
+            </button>
+
+            <div class="toggles">
+              <label class="toggle">
                 <input type="checkbox" id="noGlide" />
                 <span>Keine Gleitzeit</span>
               </label>
 
-              <label class="check">
+              <label class="toggle">
                 <input type="checkbox" id="autoResume" checked />
-                <span>Nach Pflichtpause automatisch zurück zu Arbeit</span>
+                <span>Nach Pflichtpause zurück zu Arbeit</span>
               </label>
 
-              <label class="check">
+              <label class="toggle">
                 <input type="checkbox" id="notifyOnBreak" />
                 <span>Notification bei Pflichtpause</span>
               </label>
 
-              <button class="btn btn--ghost" id="btnEnableNotify">Notifications erlauben</button>
+              <button class="btn btn--ghost" id="btnEnableNotify" type="button">Notifications</button>
             </div>
           </div>
         </div>
@@ -136,30 +135,30 @@
       <section class="card" id="glideCard">
         <div class="card__title">Gleitzeit</div>
 
-        <div class="grid grid--4">
+        <div class="grid grid--goal">
           <label class="field">
             <span>Konto aktuell (h)</span>
             <input type="text" inputmode="decimal" id="glideAccount" placeholder="0.51 oder 0,51" />
           </label>
 
           <label class="field">
-            <span>Zieltyp</span>
+            <span>Ziel</span>
             <select id="goalType">
               <option value="delta">Heute Δ (h)</option>
               <option value="account">Konto am Ende (h)</option>
             </select>
-            <small class="small">Δ = Arbeit − Soll (Pause zählt nicht in Δ).</small>
+            <small>Δ = Arbeit − Soll (Pause zählt nicht in Δ)</small>
           </label>
 
           <label class="field">
-            <span>Zielwert</span>
+            <span>Wert</span>
             <input type="text" inputmode="decimal" id="goalValue" placeholder="z.B. 1.0 oder -0.5" />
           </label>
 
           <div class="field">
             <span>&nbsp;</span>
-            <button class="btn btn--primary" id="btnCalcGoal">Go-Time</button>
-            <small class="mono" id="goalResult">—</small>
+            <button class="btn btn--primary" id="btnCalcGoal" type="button">Go-Time</button>
+            <div class="result mono" id="goalResult">—</div>
           </div>
         </div>
       </section>
@@ -167,64 +166,66 @@
       <details class="card">
         <summary class="card__title">Erweitert</summary>
 
-        <div class="splitline"></div>
+        <div class="divider"></div>
 
-        <div class="card__subtitle">Nachtragen (wenn Start vergessen)</div>
+        <div class="sectionLabel">Nachtragen (Start vergessen)</div>
         <div class="grid grid--3">
           <label class="field">
             <span>Ich arbeite seit</span>
             <input type="time" id="workBackdateSince" step="60" />
           </label>
+
           <label class="field">
             <span>Oder: schon gearbeitet (Min)</span>
             <input type="number" min="0" step="1" id="workBackdateMinutes" placeholder="z.B. 30" />
           </label>
+
           <div class="field">
             <span>&nbsp;</span>
-            <div class="row wrap">
-              <button class="btn btn--primary" id="btnApplyBackdate">Übernehmen</button>
-              <button class="btn btn--ghost" id="btnApplyBackdateStart">… & Start</button>
+            <div class="row">
+              <button class="btn btn--primary" id="btnApplyBackdate" type="button">Übernehmen</button>
+              <button class="btn btn--ghost" id="btnApplyBackdateStart" type="button">… & Start</button>
             </div>
-            <small class="mono" id="backdateResult">—</small>
+            <div class="result mono" id="backdateResult">—</div>
           </div>
         </div>
 
-        <div class="splitline"></div>
+        <div class="divider"></div>
 
-        <div class="card__subtitle">Mobi-Rechner (Eintragzeit / tatsächliche Stoppzeit)</div>
+        <div class="sectionLabel">Mobi-Rechner (für Eintragen)</div>
         <div class="grid grid--4">
           <label class="field">
             <span>Eintrag-Uhrzeit</span>
             <input type="time" id="entryTime" step="60" />
-            <small class="small">Wenn leer: nimmt „jetzt“.</small>
+            <small>leer = jetzt</small>
           </label>
 
           <label class="field">
             <span>Tatsächlich aufgehört um</span>
             <input type="time" id="actualStopTime" step="60" />
-            <small class="small">Wenn leer: nimmt Eintragzeit.</small>
+            <small>leer = Eintrag</small>
           </label>
 
           <label class="field">
-            <span>Pause-Minuten</span>
+            <span>Pause (Min)</span>
             <input type="number" min="0" step="1" id="pauseMinutes" placeholder="z.B. 30" />
           </label>
 
           <div class="field">
             <span>&nbsp;</span>
-            <button class="btn btn--primary" id="btnCalcEntryMinusPause">Ausrechnen</button>
-            <small class="mono" id="entryMinusPauseResult">—</small>
+            <button class="btn btn--primary" id="btnCalcEntryMinusPause" type="button">Ausrechnen</button>
+            <div class="result mono" id="entryMinusPauseResult">—</div>
           </div>
         </div>
 
-        <div class="splitline"></div>
+        <div class="divider"></div>
 
-        <div class="card__subtitle">Wie spät war es vor … Minuten (optional Basiszeit)</div>
+        <div class="sectionLabel">Zeit – Minuten zurück</div>
         <div class="grid grid--4">
           <label class="field">
-            <span>Basis-Uhrzeit</span>
+            <span>Basiszeit (optional)</span>
             <input type="time" id="baseTime" step="60" />
-            <small class="small">Wenn leer: nimmt „jetzt“.</small>
+            <small>leer = jetzt</small>
           </label>
 
           <label class="field">
@@ -234,8 +235,8 @@
 
           <div class="field">
             <span>&nbsp;</span>
-            <button class="btn btn--ghost" id="btnCalcAgo">Berechnen</button>
-            <small class="mono" id="agoResult">—</small>
+            <button class="btn btn--ghost" id="btnCalcAgo" type="button">Berechnen</button>
+            <div class="result mono" id="agoResult">—</div>
           </div>
 
           <div class="field"></div>
@@ -243,29 +244,29 @@
       </details>
     </section>
 
-    <!-- MOBI TAB -->
+    <!-- MOBI -->
     <section id="viewMobi" style="display:none">
       <section class="card">
         <div class="card__title">Mobi</div>
-        <div class="hint">Für 1–2 Taps: Start / Pause / Stop. (Start=jetzt ist optional.)</div>
+        <p class="hint">Maximal simpel: Start / Pause / Stop. (Pause startet hier die echte Pause.)</p>
 
-        <div class="mobiActions">
-          <button class="btn btn--good btn--xl" id="mobiWorkStart">Start</button>
-          <button class="btn btn--warn btn--xl" id="mobiPause">Pause</button>
-          <button class="btn btn--danger btn--xl" id="mobiStop">Stop</button>
+        <div class="mobi">
+          <button class="btn btn--good btn--xl" id="mobiWorkStart" type="button">Start</button>
+          <button class="btn btn--warn btn--xl" id="mobiPause" type="button">Pause</button>
+          <button class="btn btn--danger btn--xl" id="mobiStop" type="button">Stop</button>
         </div>
 
-        <div class="row wrap" style="margin-top:12px">
-          <button class="btn btn--primary btn--shine" id="mobiStartNow">Start=jetzt & starten</button>
-          <button class="btn btn--primary" id="mobiFinish">Arbeitsende</button>
-          <span class="mono" id="mobiFinishResult">—</span>
+        <div class="row" style="margin-top:12px; flex-wrap:wrap;">
+          <button class="btn btn--primary btn--callout" id="mobiStartNow" type="button">Start=jetzt & starten</button>
+          <button class="btn btn--primary" id="mobiFinish" type="button">Arbeitsende</button>
+          <span class="result mono" id="mobiFinishResult">—</span>
         </div>
       </section>
     </section>
 
     <footer class="footer">
-      <button class="btn btn--ghost" id="btnResetAll">Alles zurücksetzen</button>
-      <div class="footer__note">PWA/Offline · Speichert automatisch (localStorage)</div>
+      <button class="btn btn--ghost" id="btnResetAll" type="button">Reset</button>
+      <div class="footnote">PWA/Offline · localStorage</div>
     </footer>
   </main>
 
@@ -273,7 +274,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const pad2 = (n) => String(n).padStart(2,"0");
-  const KEY = "zeit_pwa_v1";
+  const KEY = "zeit_ui_v2";
 
   function formatHMS(sec){
     sec = Math.max(0, Math.floor(sec));
@@ -320,27 +321,21 @@
     navigator.serviceWorker.register("./sw.js").catch(()=>{});
   }
 
-  // State
   const defaultTimer = () => ({ status:"stopped", acc:0, lastStart:null });
 
   const state = {
     theme: "medium",
     tab: "normal",
-
     dayStart: "",
     targetWork: "07:00",
     requiredBreak: "00:45",
-
     noGlide: false,
     glideAccount: "",
-
     autoResume: true,
     notifyOnBreak: false,
-
     work: defaultTimer(),
     brk: defaultTimer(),
     off: defaultTimer(),
-
     breakAutoTimeoutId: null
   };
 
@@ -357,7 +352,6 @@
     }catch{}
   }
 
-  // Timers
   function isRunning(t){ return t.status==="running" && typeof t.lastStart==="number"; }
   function startTimer(t){
     if(isRunning(t)) return;
@@ -371,16 +365,12 @@
     if(isRunning(t)) t.acc += (Date.now()-t.lastStart)/1000;
     t.status="stopped"; t.lastStart=null;
   }
-  function resetTimer(t){
-    t.status="stopped"; t.acc=0; t.lastStart=null;
-  }
   function seconds(t){
     let s=t.acc;
     if(isRunning(t)) s += (Date.now()-t.lastStart)/1000;
     return s;
   }
 
-  // Off runs when starttime reached and neither work nor break running
   function shouldOffRun(){
     const ds = parseHHMM(state.dayStart);
     if(ds===null) return false;
@@ -393,7 +383,6 @@
     if(!want && isRunning(state.off)) pauseTimer(state.off);
   }
 
-  // Planned end = start + target + max(requiredBreak, breakTaken) + offTaken
   function plannedEndForDelta(deltaHours){
     const ds = parseHHMM(state.dayStart);
     const tw = parseHHMM(state.targetWork);
@@ -407,18 +396,9 @@
     const endMs = todayAt(ds).getTime() + (tw + deltaHours*3600 + brCounted + offTaken)*1000;
     return new Date(endMs);
   }
+  function plannedEnd(){ return plannedEndForDelta(0); }
 
-  function plannedEnd(){
-    return plannedEndForDelta(0);
-  }
-
-  function remainingWorkSec(){
-    const tw = parseHHMM(state.targetWork);
-    if(tw===null) return null;
-    return Math.max(0, tw - seconds(state.work));
-  }
-
-  // Notifications (local)
+  // notifications (local only)
   function canNotify(){ return "Notification" in window; }
   async function requestNotify(){
     if(!canNotify()) return false;
@@ -432,7 +412,6 @@
     try { new Notification(title, { body }); } catch {}
   }
 
-  // Auto-resume when break reaches requiredBreak
   function clearBreakAutoTimer(){
     if(state.breakAutoTimeoutId){
       clearTimeout(state.breakAutoTimeoutId);
@@ -454,17 +433,13 @@
       if(isRunning(state.brk)){
         stopTimer(state.brk);
         startTimer(state.work);
-
-        if(state.notifyOnBreak){
-          notify("Pflichtpause erfüllt", "Zurück zu Arbeit gestartet.");
-        }
-        if(navigator.vibrate) navigator.vibrate([80,50,80]);
+        if(state.notifyOnBreak) notify("Pflichtpause erfüllt", "Zurück zu Arbeit gestartet.");
+        if(navigator.vibrate) navigator.vibrate([60,40,60]);
         save();
       }
     }, leftMs);
   }
 
-  // UI apply/read
   function updateTheme(){
     document.body.dataset.theme = state.theme;
     $("themeSel").value = state.theme;
@@ -477,8 +452,8 @@
     $("tabMobi").classList.toggle("is-active", tab==="mobi");
     save();
   }
+
   function applyUI(){
-    $("themeSel").value = state.theme;
     updateTheme();
     switchTab(state.tab);
 
@@ -493,6 +468,7 @@
     $("autoResume").checked = !!state.autoResume;
     $("notifyOnBreak").checked = !!state.notifyOnBreak;
   }
+
   function readUI(){
     state.theme = $("themeSel").value;
     state.dayStart = $("dayStart").value;
@@ -506,20 +482,17 @@
     applyUI();
   }
 
-  // Start now & start work
   function startNowAndWork(){
     const n = new Date();
     const v = `${pad2(n.getHours())}:${pad2(n.getMinutes())}`;
     $("dayStart").value = v;
     readUI();
-
     stopTimer(state.brk);
     stopTimer(state.off);
     startTimer(state.work);
     save();
   }
 
-  // Finish day: stop all and update glide account
   function finishDay(){
     stopTimer(state.work);
     stopTimer(state.brk);
@@ -529,20 +502,19 @@
     const tw = parseHHMM(state.targetWork);
     const worked = seconds(state.work);
 
-    let msg = `Arbeit: ${formatHMS(worked)} · Soll: ${tw ? formatHMS(tw) : "—"}`;
+    let msg = `Arbeit ${formatHMS(worked)}`;
 
     if(!state.noGlide && tw !== null){
       const deltaH = (worked - tw)/3600;
       const newAcc = parseDecHours(state.glideAccount) + deltaH;
       state.glideAccount = (Math.round(newAcc*100)/100).toFixed(2);
-      msg = `Δ heute: ${(deltaH>=0?"+":"")}${deltaH.toFixed(2)} h · Konto: ${state.glideAccount} h`;
       $("glideAccount").value = state.glideAccount;
+      msg = `Δ ${(deltaH>=0?"+":"")}${deltaH.toFixed(2)} h · Konto ${state.glideAccount} h`;
     }
     save();
     return msg;
   }
 
-  // Render
   function render(){
     const now = new Date();
     $("bigClock").textContent = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
@@ -556,18 +528,16 @@
 
     $("heroWork").textContent = formatHMS(w);
     $("heroSub").textContent = `Pause ${formatHMS(b)} · Unterbr. ${formatHMS(o)}`;
-
     $("workStatus").textContent = state.work.status;
     $("breakStatus").textContent = state.brk.status;
 
     const end = plannedEnd();
     if(end){
       $("endTime").textContent = formatHM(end);
-      const tw = parseHHMM(state.targetWork) ?? 0;
       const rb = parseHHMM(state.requiredBreak) ?? 0;
       const brCounted = Math.max(rb, b);
       $("endSub").textContent = `Start ${state.dayStart || "—"} · Pause zählt ${formatHMS(brCounted)}`;
-    }else{
+    } else {
       $("endTime").textContent = "—";
       $("endSub").textContent = "Startzeit setzen";
     }
@@ -576,7 +546,6 @@
     save();
   }
 
-  // Events
   function hook(){
     $("tabNormal").addEventListener("click", ()=>switchTab("normal"));
     $("tabMobi").addEventListener("click", ()=>switchTab("mobi"));
@@ -591,15 +560,14 @@
     $("btnStartNow").addEventListener("click", startNowAndWork);
     $("mobiStartNow").addEventListener("click", startNowAndWork);
 
-    // Main work controls
+    // normal controls
     $("workStart").addEventListener("click", ()=>{ stopTimer(state.brk); stopTimer(state.off); startTimer(state.work); save(); });
     $("workPause").addEventListener("click", ()=>{ pauseTimer(state.work); save(); });
     $("workStop").addEventListener("click", ()=>{ stopTimer(state.work); save(); });
 
-    // Mobi controls
+    // mobi controls (pause starts real break)
     $("mobiWorkStart").addEventListener("click", ()=>{ stopTimer(state.brk); stopTimer(state.off); startTimer(state.work); save(); });
     $("mobiPause").addEventListener("click", ()=>{
-      // Pause = Arbeit pausieren + Pause starten
       pauseTimer(state.work);
       startTimer(state.brk);
       save();
@@ -613,53 +581,33 @@
       save();
     });
 
-    // On normal: pause behavior (same as mobi pause)
-    // NOTE: To keep UI simple, we use the same main Pause button to start break (not just pause work).
-    // If you want "Pause" to only pause work, tell me; I can split it.
-    $("workPause").addEventListener("dblclick", ()=>{
-      // double-click: start actual break
-      pauseTimer(state.work);
-      startTimer(state.brk);
-      save();
-      scheduleBreakAuto();
-    });
-
     $("btnEnableNotify").addEventListener("click", async ()=>{
       const ok = await requestNotify();
       if(ok){
         state.notifyOnBreak = true;
         $("notifyOnBreak").checked = true;
         save();
-        notify("Notifications aktiv", "Pflichtpause-Hinweis funktioniert, solange die App läuft.");
+        notify("Notifications aktiv", "Funktioniert, solange die App läuft.");
       }
     });
 
-    $("btnFinishDay").addEventListener("click", ()=>{
-      $("finishResult").textContent = finishDay();
-    });
-    $("mobiFinish").addEventListener("click", ()=>{
-      $("mobiFinishResult").textContent = finishDay();
-    });
+    $("btnFinishDay").addEventListener("click", ()=>{ $("finishResult").textContent = finishDay(); });
+    $("mobiFinish").addEventListener("click", ()=>{ $("mobiFinishResult").textContent = finishDay(); });
 
-    // Goal calculator (single)
     $("btnCalcGoal").addEventListener("click", ()=>{
-      if(state.noGlide){ $("goalResult").textContent = "— Keine Gleitzeit aktiv"; return; }
+      if(state.noGlide){ $("goalResult").textContent = "—"; return; }
 
       const type = $("goalType").value; // delta|account
       const v = parseDecHours($("goalValue").value);
-
-      if(!Number.isFinite(v)){ $("goalResult").textContent = "— Ungültiger Wert"; return; }
+      if(!Number.isFinite(v)){ $("goalResult").textContent = "—"; return; }
 
       const nowAcc = parseDecHours(state.glideAccount);
       const needDelta = (type === "delta") ? v : (v - nowAcc);
 
       const end = plannedEndForDelta(needDelta);
-      $("goalResult").textContent = end
-        ? `Go-Time: ${formatHM(end)} (${type === "delta" ? "Δ" : "Konto"} → ${v.toFixed(2)} h)`
-        : "— Startzeit/Soll setzen";
+      $("goalResult").textContent = end ? `Go-Time ${formatHM(end)}` : "— Startzeit/Soll setzen";
     });
 
-    // Backdate
     function applyBackdate(alsoStart){
       const since = $("workBackdateSince").value;
       const minsStr = $("workBackdateMinutes").value;
@@ -667,12 +615,12 @@
 
       if(since){
         const sec = parseHHMM(since);
-        if(sec===null){ $("backdateResult").textContent="— Ungültige Uhrzeit"; return; }
+        if(sec===null){ $("backdateResult").textContent="—"; return; }
         const diff = Math.max(0, (now.getTime() - todayAt(sec).getTime())/1000);
         state.work.acc = diff;
         state.work.status = alsoStart ? "running" : "paused";
         state.work.lastStart = alsoStart ? Date.now() : null;
-        $("backdateResult").textContent = `OK: Arbeit = ${formatHMS(diff)} (seit ${since})`;
+        $("backdateResult").textContent = `OK (${formatHMS(diff)})`;
         save();
         return;
       }
@@ -682,17 +630,16 @@
         state.work.acc = mins*60;
         state.work.status = alsoStart ? "running" : "paused";
         state.work.lastStart = alsoStart ? Date.now() : null;
-        $("backdateResult").textContent = `OK: Arbeit = ${formatHMS(mins*60)}`;
+        $("backdateResult").textContent = `OK (${formatHMS(mins*60)})`;
         save();
         return;
       }
 
-      $("backdateResult").textContent = "— Bitte „seit“ oder Minuten eintragen";
+      $("backdateResult").textContent = "—";
     }
     $("btnApplyBackdate").addEventListener("click", ()=>applyBackdate(false));
     $("btnApplyBackdateStart").addEventListener("click", ()=>applyBackdate(true));
 
-    // Entry minus pause calculator
     $("btnCalcEntryMinusPause").addEventListener("click", ()=>{
       const entry = $("entryTime").value;
       const stop  = $("actualStopTime").value;
@@ -703,36 +650,33 @@
       const stopSec  = stop  ? parseHHMM(stop)  : entrySec;
 
       if(entrySec===null || stopSec===null || !Number.isFinite(pauseMin) || pauseMin < 0){
-        $("entryMinusPauseResult").textContent = "— Ungültige Eingabe";
+        $("entryMinusPauseResult").textContent = "—";
         return;
       }
       const base = todayAt(stopSec);
       const out = new Date(base.getTime() - pauseMin*60*1000);
-      $("entryMinusPauseResult").textContent = `${formatHM(base)} − ${pauseMin} min = ${formatHM(out)}`;
+      $("entryMinusPauseResult").textContent = `${formatHM(out)}`;
     });
 
-    // Minutes ago
     $("btnCalcAgo").addEventListener("click", ()=>{
       const base = $("baseTime").value;
       const mins = Number($("minutesAgo").value);
-
-      if(!Number.isFinite(mins) || mins < 0){ $("agoResult").textContent = "—"; return; }
+      if(!Number.isFinite(mins) || mins < 0){ $("agoResult").textContent="—"; return; }
 
       let baseDate;
       if(base){
         const sec = parseHHMM(base);
-        if(sec===null){ $("agoResult").textContent = "— Ungültige Basiszeit"; return; }
+        if(sec===null){ $("agoResult").textContent="—"; return; }
         baseDate = todayAt(sec);
       } else {
         baseDate = new Date();
       }
-
       const d = new Date(baseDate.getTime() - mins*60*1000);
-      $("agoResult").textContent = `Vor ${mins} min: ${formatHM(d)}`;
+      $("agoResult").textContent = `${formatHM(d)}`;
     });
 
     $("btnResetAll").addEventListener("click", ()=>{
-      if(!confirm("Wirklich alles zurücksetzen?")) return;
+      if(!confirm("Reset?")) return;
       localStorage.removeItem(KEY);
       location.reload();
     });
