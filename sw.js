@@ -1,4 +1,4 @@
-const CACHE = "zeit-pwa-v2";
+const CACHE = "zeit-pwa-v20260227";
 const ASSETS = [
   "./",
   "./index.html",
