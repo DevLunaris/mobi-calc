@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1f232a" />
   <title>Zeit</title>
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260227" />
   <link rel="manifest" href="manifest.webmanifest" />
 </head>
 
@@ -318,7 +318,7 @@
 
   // Service Worker
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    navigator.serviceWorker.register("./sw.js?v=20260227").catch(()=>{});
   }
 
   const defaultTimer = () => ({ status:"stopped", acc:0, lastStart:null });
