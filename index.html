@@ -3,86 +3,69 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#1f232a" />
+  <meta name="theme-color" content="#f7f8fb" />
   <title>Zeit</title>
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20260227" />
+
+  <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="any">
 </head>
 
-<body data-theme="medium">
+<body data-theme="light">
   <header class="top">
-    <div class="top__left">
-      <div class="brand">ZEIT</div>
-      <div class="clock mono" id="bigClock">--:--:--</div>
-      <div class="date" id="todayLine">—</div>
-    </div>
-
-    <div class="top__right">
-      <div class="tabs" role="tablist" aria-label="Modus">
-        <button class="tab is-active" id="tabNormal" type="button">Normal</button>
-        <button class="tab" id="tabMobi" type="button">Mobi</button>
+    <div class="topRow">
+      <div>
+        <div class="brand">ZEIT</div>
+        <div class="clock mono" id="bigClock">--:--:--</div>
+        <div class="date" id="todayLine">—</div>
       </div>
 
-      <div class="toolbar">
+      <div class="topRight">
         <label class="select">
           <span>Theme</span>
           <select id="themeSel">
+            <option value="light" selected>Light</option>
+            <option value="medium">Medium</option>
             <option value="dark">Dark</option>
-            <option value="medium" selected>Medium</option>
-            <option value="light">Light</option>
           </select>
         </label>
-
-        <button class="btn btn--ghost" id="btnInstall" style="display:none" type="button">Installieren</button>
       </div>
     </div>
+
+    <nav class="tabs" aria-label="Navigation">
+      <button class="tab is-active" id="tabZeit" type="button">Zeit</button>
+      <button class="tab" id="tabStats" type="button">Stats</button>
+    </nav>
   </header>
 
   <main class="container">
 
-    <!-- HERO -->
-    <section class="card hero">
-      <div class="hero__main">
+    <!-- ZEIT VIEW -->
+    <section id="viewZeit">
+
+      <section class="card hero">
         <div class="kicker">Arbeitszeit heute</div>
         <div class="timebig mono" id="heroWork">00:00:00</div>
         <div class="sub mono" id="heroSub">Pause 00:00:00 · Unterbr. 00:00:00</div>
 
         <div class="actions">
-          <button class="btn btn--good btn--xl" id="workStart" type="button">Start</button>
-          <button class="btn btn--warn btn--xl" id="workPause" type="button">Pause</button>
-          <button class="btn btn--danger btn--xl" id="workStop" type="button">Stop</button>
+          <button class="btn btn--good btn--xl" id="btnStart" type="button">Start</button>
+          <button class="btn btn--warn btn--xl" id="btnPause" type="button">Pause</button>
+          <button class="btn btn--danger btn--xl" id="btnStop" type="button">Stop</button>
         </div>
 
-        <p class="hint">
-          „Pause“ pausiert Arbeit. Wenn du im Mobi-Tab Pause drückst, startet zusätzlich die echte Pause (für 2-Tap-Flow).
-        </p>
-      </div>
+        <div class="statusRow">
+          <div class="statusPill">
+            <div class="statusLabel">Status</div>
+            <div class="statusValue mono" id="statusText">Nichts</div>
+          </div>
 
-      <aside class="hero__side">
-        <div class="stat">
-          <div class="stat__label">Status</div>
-          <div class="stat__value mono" id="workStatus">stopped</div>
+          <button class="btn btn--primary" id="btnFinishDay" type="button">Arbeitsende</button>
         </div>
 
-        <div class="stat">
-          <div class="stat__label">Pause</div>
-          <div class="stat__value mono" id="breakStatus">stopped</div>
-        </div>
-
-        <div class="stat stat--big">
-          <div class="stat__label">Geplantes Ende</div>
-          <div class="stat__value mono" id="endTime">—</div>
-          <div class="stat__sub mono" id="endSub">—</div>
-        </div>
-
-        <button class="btn btn--primary" id="btnFinishDay" type="button">Arbeitsende</button>
         <div class="mini mono" id="finishResult">—</div>
-      </aside>
-    </section>
-
-    <!-- NORMAL -->
-    <section id="viewNormal">
+      </section>
 
       <section class="card">
         <div class="card__title">Setup</div>
@@ -91,84 +74,78 @@
           <label class="field">
             <span>Startzeit</span>
             <input type="time" id="dayStart" step="60" lang="de-DE" />
-            <small>Wenn AM/PM sichtbar: einmal AM/PM auswählen, sonst bleibt “--”.</small>
+            <small>Wird automatisch gesetzt, wenn du auf Start drückst (du kannst es danach ändern).</small>
           </label>
 
           <label class="field">
-            <span>Soll (ohne Pause)</span>
+            <span>Soll-Arbeitszeit (Dauer)</span>
             <input type="time" id="targetWork" value="07:00" step="60" />
+            <small>Das ist eine Dauer, nicht eine Uhrzeit.</small>
           </label>
 
           <label class="field">
-            <span>Pflichtpause</span>
+            <span>Pflichtpause (Dauer)</span>
             <input type="time" id="requiredBreak" value="00:45" step="60" />
+            <small>Das ist eine Dauer, nicht eine Uhrzeit.</small>
           </label>
 
           <div class="field">
-            <span>Quick</span>
-            <button class="btn btn--primary btn--callout" id="btnStartNow" type="button">
-              Start=jetzt & starten
+            <span>Pause</span>
+            <label class="toggle">
+              <input type="checkbox" id="autoResume" checked />
+              <span>Nach Pflichtpause automatisch zurück zu Arbeit</span>
+            </label>
+
+            <button class="btn btn--ghost" id="btnNotifyToggle" type="button">
+              Notifications: aus
             </button>
-
-            <div class="toggles">
-              <label class="toggle">
-                <input type="checkbox" id="noGlide" />
-                <span>Keine Gleitzeit</span>
-              </label>
-
-              <label class="toggle">
-                <input type="checkbox" id="autoResume" checked />
-                <span>Nach Pflichtpause zurück zu Arbeit</span>
-              </label>
-
-              <label class="toggle">
-                <input type="checkbox" id="notifyOnBreak" />
-                <span>Notification bei Pflichtpause</span>
-              </label>
-
-              <button class="btn btn--ghost" id="btnEnableNotify" type="button">Notifications</button>
-            </div>
+            <small>Funktioniert, solange die App offen ist (Browser/PWA läuft).</small>
           </div>
         </div>
       </section>
 
-      <section class="card" id="glideCard">
-        <div class="card__title">Gleitzeit</div>
+      <section class="card">
+        <div class="card__title">Gleitkonto</div>
 
         <div class="grid grid--goal">
           <label class="field">
             <span>Konto aktuell (h)</span>
-            <input type="text" inputmode="decimal" id="glideAccount" placeholder="0.51 oder 0,51" />
+            <input type="text" inputmode="decimal" id="glideAccount" placeholder="z.B. 0.50" />
+            <small>Komma oder Punkt geht.</small>
           </label>
 
           <label class="field">
             <span>Ziel</span>
             <select id="goalType">
-              <option value="delta">Heute Δ (h)</option>
+              <option value="none" selected>Kein Ziel</option>
+              <option value="delta">Heute extra machen (h)</option>
               <option value="account">Konto am Ende (h)</option>
             </select>
-            <small>Δ = Arbeit − Soll (Pause zählt nicht in Δ)</small>
+            <small>„Heute extra machen“ = mehr/weniger als Soll.</small>
           </label>
 
           <label class="field">
             <span>Wert</span>
-            <input type="text" inputmode="decimal" id="goalValue" placeholder="z.B. 1.0 oder -0.5" />
+            <input type="text" inputmode="decimal" id="goalValue" placeholder="z.B. 1.0 oder -0.5" disabled />
+            <small>Nur wenn du ein Ziel auswählst.</small>
           </label>
 
           <div class="field">
             <span>&nbsp;</span>
-            <button class="btn btn--primary" id="btnCalcGoal" type="button">Go-Time</button>
+            <button class="btn btn--primary" id="btnCalcGoal" type="button" disabled>Go-Time</button>
             <div class="result mono" id="goalResult">—</div>
           </div>
         </div>
       </section>
 
       <details class="card">
-        <summary class="card__title">Erweitert</summary>
+        <summary class="card__title summary">
+          Erweitert <span class="chev" aria-hidden="true">›</span>
+        </summary>
 
         <div class="divider"></div>
 
-        <div class="sectionLabel">Nachtragen (Start vergessen)</div>
+        <div class="sectionLabel">Nachtragen (wenn Start vergessen)</div>
         <div class="grid grid--3">
           <label class="field">
             <span>Ich arbeite seit</span>
@@ -193,7 +170,7 @@
         <div class="divider"></div>
 
         <div class="sectionLabel">Mobi-Rechner (für Eintragen)</div>
-        <div class="grid grid--4">
+        <div class="grid grid--3">
           <label class="field">
             <span>Eintrag-Uhrzeit</span>
             <input type="time" id="entryTime" step="60" />
@@ -201,13 +178,7 @@
           </label>
 
           <label class="field">
-            <span>Tatsächlich aufgehört um</span>
-            <input type="time" id="actualStopTime" step="60" />
-            <small>leer = Eintrag</small>
-          </label>
-
-          <label class="field">
-            <span>Pause (Min)</span>
+            <span>Pause (Minuten)</span>
             <input type="number" min="0" step="1" id="pauseMinutes" placeholder="z.B. 30" />
           </label>
 
@@ -217,65 +188,128 @@
             <div class="result mono" id="entryMinusPauseResult">—</div>
           </div>
         </div>
+      </details>
+
+      <footer class="footer">
+        <button class="btn btn--ghost" id="btnResetAll" type="button">Reset</button>
+        <div class="footnote">Speichert lokal im Browser · Backup im Stats-Tab</div>
+      </footer>
+
+    </section>
+
+    <!-- STATS VIEW -->
+    <section id="viewStats" style="display:none">
+
+      <section class="card">
+        <div class="statsHeader">
+          <div>
+            <div class="card__title" style="margin:0">Stats</div>
+            <div class="mini">Alles lokal gespeichert · Export/Import unten</div>
+          </div>
+
+          <div class="statsControls">
+            <label class="select select--compact">
+              <span>Zeitraum</span>
+              <select id="statsRange">
+                <option value="week">Woche</option>
+                <option value="month" selected>Monat</option>
+                <option value="year">Jahr</option>
+                <option value="all">Alles</option>
+              </select>
+            </label>
+
+            <button class="btn btn--primary" id="btnSchoolToday" type="button">Berufsschule heute</button>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi__label">Streak (Mo–Fr)</div>
+            <div class="kpi__value mono" id="kpiStreak">—</div>
+            <div class="kpi__sub">Wochenende zählt nicht</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Summe</div>
+            <div class="kpi__value mono" id="kpiSum">—</div>
+            <div class="kpi__sub">Arbeitsstunden</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Durchschnitt</div>
+            <div class="kpi__value mono" id="kpiAvg">—</div>
+            <div class="kpi__sub">Start / Ende</div>
+          </div>
+        </div>
 
         <div class="divider"></div>
 
-        <div class="sectionLabel">Zeit – Minuten zurück</div>
-        <div class="grid grid--4">
-          <label class="field">
-            <span>Basiszeit (optional)</span>
-            <input type="time" id="baseTime" step="60" />
-            <small>leer = jetzt</small>
-          </label>
-
-          <label class="field">
-            <span>Minuten zurück</span>
-            <input type="number" min="0" step="1" id="minutesAgo" placeholder="z.B. 45" />
-          </label>
-
-          <div class="field">
-            <span>&nbsp;</span>
-            <button class="btn btn--ghost" id="btnCalcAgo" type="button">Berechnen</button>
-            <div class="result mono" id="agoResult">—</div>
+        <div class="sectionLabel">Monat (Heatmap)</div>
+        <div class="heatWrap">
+          <div class="heatLegend">
+            <span class="mini">wenig</span>
+            <span class="heatDot heat0"></span>
+            <span class="heatDot heat1"></span>
+            <span class="heatDot heat2"></span>
+            <span class="heatDot heat3"></span>
+            <span class="mini">viel</span>
           </div>
-
-          <div class="field"></div>
-        </div>
-      </details>
-    </section>
-
-    <!-- MOBI -->
-    <section id="viewMobi" style="display:none">
-      <section class="card">
-        <div class="card__title">Mobi</div>
-        <p class="hint">Maximal simpel: Start / Pause / Stop. (Pause startet hier die echte Pause.)</p>
-
-        <div class="mobi">
-          <button class="btn btn--good btn--xl" id="mobiWorkStart" type="button">Start</button>
-          <button class="btn btn--warn btn--xl" id="mobiPause" type="button">Pause</button>
-          <button class="btn btn--danger btn--xl" id="mobiStop" type="button">Stop</button>
+          <div class="heat" id="heatmap"></div>
         </div>
 
-        <div class="row" style="margin-top:12px; flex-wrap:wrap;">
-          <button class="btn btn--primary btn--callout" id="mobiStartNow" type="button">Start=jetzt & starten</button>
-          <button class="btn btn--primary" id="mobiFinish" type="button">Arbeitsende</button>
-          <span class="result mono" id="mobiFinishResult">—</span>
+        <div class="divider"></div>
+
+        <div class="sectionLabel">Trend (letzte 8 Wochen)</div>
+        <div class="sparkCard">
+          <svg id="trendSvg" viewBox="0 0 320 120" preserveAspectRatio="none" aria-label="Trendlinie"></svg>
+          <div class="mini" id="trendLabel">—</div>
         </div>
       </section>
+
+      <section class="card">
+        <div class="card__title">Export / Import</div>
+
+        <div class="grid grid--3">
+          <div class="field">
+            <span>CSV</span>
+            <button class="btn btn--primary" id="btnExportCSV" type="button">CSV exportieren</button>
+            <small>Für Excel/Sheets.</small>
+          </div>
+
+          <div class="field">
+            <span>Backup</span>
+            <button class="btn btn--ghost" id="btnExportJSON" type="button">Backup (JSON)</button>
+            <small>Für Gerätewechsel.</small>
+          </div>
+
+          <label class="field">
+            <span>Import (JSON)</span>
+            <input type="file" id="importFile" accept="application/json" />
+            <small>Fragt vor dem Überschreiben.</small>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="sectionLabel">Logs</div>
+        <div class="logList" id="logList">—</div>
+      </section>
+
     </section>
 
-    <footer class="footer">
-      <button class="btn btn--ghost" id="btnResetAll" type="button">Reset</button>
-      <div class="footnote">PWA/Offline · localStorage</div>
-    </footer>
+    <!-- Undo toast -->
+    <div class="toast" id="undoToast" aria-live="polite" style="display:none">
+      <div class="toast__text" id="undoText">—</div>
+      <button class="btn btn--ghost btn--sm" id="btnUndo" type="button">Rückgängig</button>
+      <button class="btn btn--ghost btn--sm" id="btnUndoClose" type="button">✕</button>
+    </div>
+
   </main>
 
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
   const pad2 = (n) => String(n).padStart(2,"0");
-  const KEY = "zeit_ui_v2";
 
+  // ---- helpers
   function formatHMS(sec){
     sec = Math.max(0, Math.floor(sec));
     const h = Math.floor(sec/3600);
@@ -284,59 +318,77 @@
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   }
   function formatHM(d){ return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
-
   function parseHHMM(str){
     if(!str || !/^\d{2}:\d{2}$/.test(str)) return null;
     const [h,m] = str.split(":").map(Number);
     return h*3600 + m*60;
   }
-  function todayAt(sec){
-    const d = new Date();
-    d.setHours(0,0,0,0);
-    return new Date(d.getTime() + sec*1000);
+  function todayMidnight(){
+    const d = new Date(); d.setHours(0,0,0,0); return d;
+  }
+  function dateFromISO(iso){ return new Date(iso + "T00:00:00"); }
+  function isoFromDate(d){
+    const x = new Date(d); x.setHours(0,0,0,0);
+    return x.toISOString().slice(0,10);
   }
   function parseDecHours(str){
     if(!str) return 0;
     const v = Number(String(str).trim().replace(",", "."));
     return Number.isFinite(v) ? v : 0;
   }
+  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
-  // PWA install prompt
-  let deferredPrompt = null;
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    $("btnInstall").style.display = "inline-flex";
-  });
-  $("btnInstall").addEventListener("click", async () => {
-    if(!deferredPrompt) return;
-    deferredPrompt.prompt();
-    try { await deferredPrompt.userChoice; } catch {}
-    deferredPrompt = null;
-    $("btnInstall").style.display = "none";
-  });
-
-  // Service Worker
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=20260227").catch(()=>{});
+  // Monday-based week start
+  function startOfWeek(d){
+    const x = new Date(d); x.setHours(0,0,0,0);
+    const day = (x.getDay()+6)%7; // Mon=0
+    x.setDate(x.getDate()-day);
+    return x;
+  }
+  function startOfMonth(d){
+    const x = new Date(d); x.setHours(0,0,0,0); x.setDate(1);
+    return x;
+  }
+  function startOfYear(d){
+    const x = new Date(d); x.setHours(0,0,0,0); x.setMonth(0,1);
+    return x;
   }
 
+  function isWeekend(d){
+    const g = d.getDay(); // 0=Sun,6=Sat
+    return g === 0 || g === 6;
+  }
+
+  // ---- storage
+  const KEY = "zeit_app_v4"; // keep stable => data persists across pushes
   const defaultTimer = () => ({ status:"stopped", acc:0, lastStart:null });
 
   const state = {
-    theme: "medium",
-    tab: "normal",
+    theme: "light",
+    tab: "zeit",
+
+    // config
     dayStart: "",
-    targetWork: "07:00",
-    requiredBreak: "00:45",
-    noGlide: false,
-    glideAccount: "",
+    targetWork: "07:00",     // duration
+    requiredBreak: "00:45",  // duration
     autoResume: true,
-    notifyOnBreak: false,
+    notificationsEnabled: false,
+
+    // glide
+    glideAccount: "",
+    goalType: "none", // none | delta | account
+    goalValue: "",
+
+    // timers
     work: defaultTimer(),
     brk: defaultTimer(),
     off: defaultTimer(),
-    breakAutoTimeoutId: null
+
+    // logs
+    logs: [],
+
+    // undo (persisted so "oops" after reload still possible)
+    undo: null
   };
 
   function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
@@ -349,21 +401,24 @@
       state.work = obj.work || defaultTimer();
       state.brk  = obj.brk  || defaultTimer();
       state.off  = obj.off  || defaultTimer();
+      state.logs = Array.isArray(obj.logs) ? obj.logs : [];
+      state.undo = obj.undo || null;
     }catch{}
   }
 
+  // ---- timers
   function isRunning(t){ return t.status==="running" && typeof t.lastStart==="number"; }
   function startTimer(t){
     if(isRunning(t)) return;
     t.status="running"; t.lastStart=Date.now();
   }
-  function pauseTimer(t){
-    if(isRunning(t)) t.acc += (Date.now()-t.lastStart)/1000;
-    t.status="paused"; t.lastStart=null;
-  }
   function stopTimer(t){
     if(isRunning(t)) t.acc += (Date.now()-t.lastStart)/1000;
     t.status="stopped"; t.lastStart=null;
+  }
+  function pauseTimer(t){
+    if(isRunning(t)) t.acc += (Date.now()-t.lastStart)/1000;
+    t.status="paused"; t.lastStart=null;
   }
   function seconds(t){
     let s=t.acc;
@@ -371,10 +426,12 @@
     return s;
   }
 
+  // interruption ("off") runs when start time reached AND neither work nor break is running
   function shouldOffRun(){
     const ds = parseHHMM(state.dayStart);
     if(ds===null) return false;
-    if(Date.now() < todayAt(ds).getTime()) return false;
+    const start = new Date(todayMidnight().getTime() + ds*1000);
+    if(Date.now() < start.getTime()) return false;
     return !isRunning(state.work) && !isRunning(state.brk);
   }
   function syncOff(){
@@ -383,6 +440,7 @@
     if(!want && isRunning(state.off)) pauseTimer(state.off);
   }
 
+  // planned end for goal
   function plannedEndForDelta(deltaHours){
     const ds = parseHHMM(state.dayStart);
     const tw = parseHHMM(state.targetWork);
@@ -393,33 +451,45 @@
     const offTaken = seconds(state.off);
     const brCounted = Math.max(rb, brTaken);
 
-    const endMs = todayAt(ds).getTime() + (tw + deltaHours*3600 + brCounted + offTaken)*1000;
+    const start = new Date(todayMidnight().getTime() + ds*1000);
+    const endMs = start.getTime() + (tw + deltaHours*3600 + brCounted + offTaken)*1000;
     return new Date(endMs);
   }
-  function plannedEnd(){ return plannedEndForDelta(0); }
 
-  // notifications (local only)
+  // ---- notifications
   function canNotify(){ return "Notification" in window; }
-  async function requestNotify(){
-    if(!canNotify()) return false;
-    if(Notification.permission === "granted") return true;
-    const p = await Notification.requestPermission();
-    return p === "granted";
+  async function toggleNotify(){
+    if(!canNotify()){
+      alert("Notifications werden von diesem Browser nicht unterstützt.");
+      return;
+    }
+    if(Notification.permission !== "granted"){
+      const p = await Notification.requestPermission();
+      if(p !== "granted"){
+        state.notificationsEnabled = false;
+        save();
+        renderNotifyBtn();
+        return;
+      }
+    }
+    state.notificationsEnabled = !state.notificationsEnabled;
+    save();
+    renderNotifyBtn();
   }
   function notify(title, body){
     if(!canNotify()) return;
+    if(!state.notificationsEnabled) return;
     if(Notification.permission !== "granted") return;
     try { new Notification(title, { body }); } catch {}
   }
 
-  function clearBreakAutoTimer(){
-    if(state.breakAutoTimeoutId){
-      clearTimeout(state.breakAutoTimeoutId);
-      state.breakAutoTimeoutId = null;
-    }
+  // auto-resume
+  let breakAutoTimeout = null;
+  function clearBreakAuto(){
+    if(breakAutoTimeout){ clearTimeout(breakAutoTimeout); breakAutoTimeout=null; }
   }
   function scheduleBreakAuto(){
-    clearBreakAutoTimer();
+    clearBreakAuto();
     if(!state.autoResume) return;
     if(!isRunning(state.brk)) return;
 
@@ -429,92 +499,695 @@
     const already = seconds(state.brk);
     const leftMs = Math.max(0, (rb - already) * 1000);
 
-    state.breakAutoTimeoutId = setTimeout(() => {
+    breakAutoTimeout = setTimeout(() => {
       if(isRunning(state.brk)){
         stopTimer(state.brk);
         startTimer(state.work);
-        if(state.notifyOnBreak) notify("Pflichtpause erfüllt", "Zurück zu Arbeit gestartet.");
+        notify("Pflichtpause fertig", "Arbeit läuft wieder.");
         if(navigator.vibrate) navigator.vibrate([60,40,60]);
         save();
       }
     }, leftMs);
   }
 
-  function updateTheme(){
-    document.body.dataset.theme = state.theme;
-    $("themeSel").value = state.theme;
+  // ---- UI
+  function setTheme(v){
+    state.theme = v;
+    document.body.dataset.theme = v;
+    $("themeSel").value = v;
+    save();
   }
   function switchTab(tab){
     state.tab = tab;
-    $("viewNormal").style.display = tab==="normal" ? "" : "none";
-    $("viewMobi").style.display = tab==="mobi" ? "" : "none";
-    $("tabNormal").classList.toggle("is-active", tab==="normal");
-    $("tabMobi").classList.toggle("is-active", tab==="mobi");
+    $("viewZeit").style.display = tab==="zeit" ? "" : "none";
+    $("viewStats").style.display = tab==="stats" ? "" : "none";
+    $("tabZeit").classList.toggle("is-active", tab==="zeit");
+    $("tabStats").classList.toggle("is-active", tab==="stats");
     save();
+    if(tab==="stats") renderStats();
   }
-
-  function applyUI(){
-    updateTheme();
-    switchTab(state.tab);
-
-    $("dayStart").value = state.dayStart || "";
-    $("targetWork").value = state.targetWork || "07:00";
-    $("requiredBreak").value = state.requiredBreak || "00:45";
-
-    $("noGlide").checked = !!state.noGlide;
-    $("glideAccount").value = state.glideAccount || "";
-    $("glideCard").style.display = state.noGlide ? "none" : "";
-
-    $("autoResume").checked = !!state.autoResume;
-    $("notifyOnBreak").checked = !!state.notifyOnBreak;
+  function statusLabel(){
+    if(isRunning(state.work)) return "Arbeit";
+    if(isRunning(state.brk)) return "Pause";
+    return "Nichts";
   }
-
-  function readUI(){
-    state.theme = $("themeSel").value;
-    state.dayStart = $("dayStart").value;
-    state.targetWork = $("targetWork").value || "07:00";
-    state.requiredBreak = $("requiredBreak").value || "00:45";
-    state.noGlide = $("noGlide").checked;
-    state.glideAccount = $("glideAccount").value || "";
-    state.autoResume = $("autoResume").checked;
-    state.notifyOnBreak = $("notifyOnBreak").checked;
-    save();
-    applyUI();
-  }
-
-  function startNowAndWork(){
+  function setStartTimeToNowIfEmpty(){
     const n = new Date();
     const v = `${pad2(n.getHours())}:${pad2(n.getMinutes())}`;
+    state.dayStart = v;
     $("dayStart").value = v;
-    readUI();
+  }
+
+  // ---- Undo toast
+  let toastTimer = null;
+  function showUndo(text){
+    $("undoText").textContent = text;
+    $("undoToast").style.display = "";
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>{ hideUndo(); }, 10000);
+  }
+  function hideUndo(){
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = null;
+    $("undoToast").style.display = "none";
+  }
+
+  function setUndo(action, label){
+    // action: { kind, prevLog, nextLog, date, prevGlideAccount, nextGlideAccount }
+    state.undo = {
+      ...action,
+      label,
+      createdAt: Date.now()
+    };
+    save();
+    showUndo(label);
+  }
+
+  function applyUndo(){
+    const u = state.undo;
+    if(!u){ hideUndo(); return; }
+
+    // restore glide account
+    if(typeof u.prevGlideAccount === "string"){
+      state.glideAccount = u.prevGlideAccount;
+      $("glideAccount").value = state.glideAccount;
+    }
+
+    // restore logs
+    const idx = state.logs.findIndex(x => x.date === u.date);
+
+    if(u.prevLog === null){
+      // previously didn't exist -> remove current
+      if(idx >= 0) state.logs.splice(idx, 1);
+    } else {
+      // restore previous
+      if(idx >= 0) state.logs[idx] = u.prevLog;
+      else state.logs.push(u.prevLog);
+    }
+
+    // clear undo
+    state.undo = null;
+    save();
+    hideUndo();
+    if(state.tab==="stats") renderStats();
+    $("finishResult").textContent = "Rückgängig gemacht.";
+  }
+
+  // ---- Log helpers
+  function upsertLog(dateISO, nextLog, prevGlide, nextGlide, label){
+    const idx = state.logs.findIndex(x => x.date === dateISO);
+    const prevLog = idx >= 0 ? state.logs[idx] : null;
+
+    // write new
+    if(idx >= 0) state.logs[idx] = nextLog;
+    else state.logs.push(nextLog);
+
+    // set undo
+    setUndo({
+      kind: "upsert",
+      date: dateISO,
+      prevLog,
+      nextLog,
+      prevGlideAccount: prevGlide,
+      nextGlideAccount: nextGlide
+    }, label);
+
+    save();
+  }
+
+  function deleteLog(dateISO){
+    const idx = state.logs.findIndex(x => x.date === dateISO);
+    if(idx < 0) return;
+
+    const prevGlide = state.glideAccount;
+    const removed = state.logs[idx];
+
+    state.logs.splice(idx, 1);
+
+    // deleting logs doesn't auto-change glide account (we keep it simple and safe).
+    // If you WANT it to recompute glide from history later, we can add a "Recalc" button.
+    setUndo({
+      kind: "delete",
+      date: dateISO,
+      prevLog: removed,
+      nextLog: null,
+      prevGlideAccount: prevGlide,
+      nextGlideAccount: prevGlide
+    }, `Eintrag gelöscht (${dateISO})`);
+
+    save();
+    if(state.tab==="stats") renderStats();
+  }
+
+  // ---- Actions
+  function onStart(){
+    if(!state.dayStart) setStartTimeToNowIfEmpty();
     stopTimer(state.brk);
     stopTimer(state.off);
     startTimer(state.work);
     save();
   }
 
-  function finishDay(){
+  function onPause(){
+    stopTimer(state.work);
+    stopTimer(state.off);
+    startTimer(state.brk);
+    save();
+    scheduleBreakAuto();
+  }
+
+  function onStop(){
     stopTimer(state.work);
     stopTimer(state.brk);
     stopTimer(state.off);
-    clearBreakAutoTimer();
+    clearBreakAuto();
+    save();
+  }
+
+  function finishDay(){
+    const prevGlide = state.glideAccount;
+
+    stopTimer(state.work);
+    stopTimer(state.brk);
+    stopTimer(state.off);
+    clearBreakAuto();
+
+    const date = isoFromDate(new Date());
+    const worked = Math.round(seconds(state.work));
+    const br = Math.round(seconds(state.brk));
+    const off = Math.round(seconds(state.off));
 
     const tw = parseHHMM(state.targetWork);
-    const worked = seconds(state.work);
-
-    let msg = `Arbeit ${formatHMS(worked)}`;
-
-    if(!state.noGlide && tw !== null){
-      const deltaH = (worked - tw)/3600;
+    let deltaH = 0;
+    if(tw !== null){
+      deltaH = (worked - tw)/3600;
       const newAcc = parseDecHours(state.glideAccount) + deltaH;
       state.glideAccount = (Math.round(newAcc*100)/100).toFixed(2);
       $("glideAccount").value = state.glideAccount;
-      msg = `Δ ${(deltaH>=0?"+":"")}${deltaH.toFixed(2)} h · Konto ${state.glideAccount} h`;
     }
+
+    const end = new Date();
+    const nextLog = {
+      date,
+      type: "work",
+      start: state.dayStart || "",
+      end: `${pad2(end.getHours())}:${pad2(end.getMinutes())}`,
+      workSeconds: worked,
+      // we keep these for correctness, but we don't show break stats
+      breakSeconds: br,
+      offSeconds: off,
+      targetWork: state.targetWork,
+      requiredBreak: state.requiredBreak,
+      deltaHours: Number(deltaH.toFixed(2)),
+      glideAccount: state.glideAccount
+    };
+
+    upsertLog(date, nextLog, prevGlide, state.glideAccount, "Arbeitsende gespeichert");
+
+    // reset timers for next day (keep config)
+    state.work = defaultTimer();
+    state.brk = defaultTimer();
+    state.off = defaultTimer();
+
     save();
-    return msg;
+
+    return (tw===null)
+      ? `Gespeichert. Arbeit: ${formatHMS(worked)}`
+      : `Gespeichert. Δ ${(deltaH>=0?"+":"")}${deltaH.toFixed(2)}h · Konto ${state.glideAccount}h`;
   }
 
+  function setSchoolToday(){
+    const date = isoFromDate(new Date());
+    const tw = parseHHMM(state.targetWork);
+    if(tw === null){
+      alert("Bitte Soll-Arbeitszeit setzen (z.B. 07:00).");
+      return;
+    }
+
+    const prevGlide = state.glideAccount;
+    // Berufsschule zählt als volle Sollzeit => delta 0 => gleitkonto unverändert
+    const end = new Date();
+    const nextLog = {
+      date,
+      type: "school",
+      start: "Berufsschule",
+      end: `${pad2(end.getHours())}:${pad2(end.getMinutes())}`,
+      workSeconds: tw,
+      breakSeconds: 0,
+      offSeconds: 0,
+      targetWork: state.targetWork,
+      requiredBreak: state.requiredBreak,
+      deltaHours: 0,
+      glideAccount: state.glideAccount
+    };
+
+    upsertLog(date, nextLog, prevGlide, state.glideAccount, "Berufsschule eingetragen");
+    if(state.tab==="stats") renderStats();
+  }
+
+  // ---- Advanced
+  function applyBackdate(alsoStart){
+    const since = $("workBackdateSince").value;
+    const minsStr = $("workBackdateMinutes").value;
+    const now = new Date();
+
+    if(since){
+      const sec = parseHHMM(since);
+      if(sec===null){ $("backdateResult").textContent="—"; return; }
+      const start = new Date(todayMidnight().getTime() + sec*1000);
+      const diff = Math.max(0, (now.getTime() - start.getTime())/1000);
+      state.work.acc = diff;
+      state.work.status = alsoStart ? "running" : "paused";
+      state.work.lastStart = alsoStart ? Date.now() : null;
+      $("backdateResult").textContent = `OK (${formatHMS(diff)})`;
+      save();
+      return;
+    }
+
+    const mins = Number(minsStr);
+    if(Number.isFinite(mins) && mins >= 0){
+      state.work.acc = mins*60;
+      state.work.status = alsoStart ? "running" : "paused";
+      state.work.lastStart = alsoStart ? Date.now() : null;
+      $("backdateResult").textContent = `OK (${formatHMS(mins*60)})`;
+      save();
+      return;
+    }
+
+    $("backdateResult").textContent="—";
+  }
+
+  function calcEntryMinusPause(){
+    const entry = $("entryTime").value;
+    const pauseMin = Number($("pauseMinutes").value || 0);
+    const now = new Date();
+    const entrySec = entry ? parseHHMM(entry) : (now.getHours()*3600 + now.getMinutes()*60);
+
+    if(entrySec===null || !Number.isFinite(pauseMin) || pauseMin < 0){
+      $("entryMinusPauseResult").textContent = "—";
+      return;
+    }
+
+    const base = new Date(todayMidnight().getTime() + entrySec*1000);
+    const out = new Date(base.getTime() - pauseMin*60*1000);
+    $("entryMinusPauseResult").textContent = `${formatHM(out)}`;
+  }
+
+  // ---- Goal
+  function updateGoalUI(){
+    const gt = $("goalType").value;
+    state.goalType = gt;
+
+    const enabled = gt !== "none";
+    $("goalValue").disabled = !enabled;
+    $("btnCalcGoal").disabled = !enabled;
+
+    if(!enabled){
+      $("goalResult").textContent = "—";
+      $("goalValue").value = "";
+      state.goalValue = "";
+    }
+    save();
+  }
+
+  function calcGoal(){
+    if(state.goalType === "none") return;
+    const v = parseDecHours($("goalValue").value);
+    if(!Number.isFinite(v)){ $("goalResult").textContent = "—"; return; }
+
+    state.goalValue = $("goalValue").value;
+
+    const nowAcc = parseDecHours(state.glideAccount);
+    const needDelta = (state.goalType === "delta") ? v : (v - nowAcc);
+    const end = plannedEndForDelta(needDelta);
+
+    $("goalResult").textContent = end ? `Go-Time: ${formatHM(end)}` : "Startzeit/Soll setzen";
+    save();
+  }
+
+  // ---- Stats computations
+  function logsInRange(range){
+    const now = new Date();
+    let start = new Date(0);
+    let end = new Date(now); end.setHours(23,59,59,999);
+
+    if(range==="week"){
+      start = startOfWeek(now);
+    } else if(range==="month"){
+      start = startOfMonth(now);
+    } else if(range==="year"){
+      start = startOfYear(now);
+    } else {
+      start = new Date(0);
+    }
+
+    const s = start.getTime();
+    const e = end.getTime();
+
+    return state.logs.filter(l => {
+      const t = dateFromISO(l.date).getTime();
+      return t >= s && t <= e;
+    });
+  }
+
+  function meanTimeHM(values){
+    const secs = values.map(parseHHMM).filter(v => v !== null);
+    if(secs.length === 0) return "—";
+    const avg = Math.round(secs.reduce((a,b)=>a+b,0)/secs.length);
+    const h = Math.floor(avg/3600), m = Math.floor((avg%3600)/60);
+    return `${pad2(h)}:${pad2(m)}`;
+  }
+
+  function computeStreakWeekdays(){
+    // streak counts consecutive weekdays with a log (work or school).
+    // weekends are skipped (do not break).
+    const set = new Set(state.logs.map(l => l.date));
+
+    let d = todayMidnight();
+    // if today is weekend, move back to Friday (or last weekday)
+    while(isWeekend(d)) d.setDate(d.getDate()-1);
+
+    let streak = 0;
+    while(true){
+      const iso = isoFromDate(d);
+      if(set.has(iso)){
+        streak++;
+      } else {
+        break;
+      }
+      // go to previous weekday, skipping weekends
+      d.setDate(d.getDate()-1);
+      while(isWeekend(d)) d.setDate(d.getDate()-1);
+    }
+    return streak;
+  }
+
+  function renderHeatmapForCurrentMonth(){
+    const el = $("heatmap");
+    el.innerHTML = "";
+
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const month = monthStart.getMonth();
+
+    // map date -> hours
+    const byDate = new Map();
+    for(const l of state.logs){
+      const d = dateFromISO(l.date);
+      if(d.getFullYear()===now.getFullYear() && d.getMonth()===month){
+        const h = (l.workSeconds||0)/3600;
+        byDate.set(l.date, h);
+      }
+    }
+
+    // build cells from Monday-first weeks
+    const first = new Date(monthStart);
+    const firstWeekStart = startOfWeek(first);
+
+    // find last day of month
+    const last = new Date(monthStart);
+    last.setMonth(last.getMonth()+1);
+    last.setDate(0); // last day prev month
+
+    // up to 6 weeks
+    const cells = [];
+    const cursor = new Date(firstWeekStart);
+    for(let i=0;i<42;i++){
+      const iso = isoFromDate(cursor);
+      const inMonth = cursor.getMonth()===month;
+      const h = inMonth ? (byDate.get(iso) || 0) : 0;
+      cells.push({ iso, inMonth, h, weekend: isWeekend(cursor) });
+      cursor.setDate(cursor.getDate()+1);
+    }
+
+    // intensity based on hours (0..>=8)
+    function level(h){
+      if(h <= 0) return 0;
+      if(h < 3) return 1;
+      if(h < 6) return 2;
+      return 3;
+    }
+
+    for(const c of cells){
+      const div = document.createElement("div");
+      div.className = "heatCell " + (c.inMonth ? `heatL${level(c.h)}` : "heatOut");
+      div.title = c.inMonth
+        ? `${c.iso} · ${c.h.toFixed(1)}h${c.weekend ? " (Wochenende)" : ""}`
+        : "";
+      el.appendChild(div);
+    }
+  }
+
+  function renderTrendLast8Weeks(){
+    // compute weekly totals for last 8 weeks (Mon-Sun)
+    const now = new Date();
+    const wStart = startOfWeek(now);
+    // create 8 week buckets ending current week
+    const buckets = [];
+    for(let i=7;i>=0;i--){
+      const s = new Date(wStart); s.setDate(s.getDate()-7*i);
+      const e = new Date(s); e.setDate(e.getDate()+7);
+      buckets.push({ s, e, hours: 0 });
+    }
+
+    for(const l of state.logs){
+      const d = dateFromISO(l.date);
+      const t = d.getTime();
+      for(const b of buckets){
+        if(t >= b.s.getTime() && t < b.e.getTime()){
+          b.hours += (l.workSeconds||0)/3600;
+          break;
+        }
+      }
+    }
+
+    const max = Math.max(1, ...buckets.map(b=>b.hours));
+    const svg = $("trendSvg");
+    svg.innerHTML = "";
+
+    const W=320, H=120;
+    const pad = 12;
+
+    // grid line
+    const grid = document.createElementNS("http://www.w3.org/2000/svg","line");
+    grid.setAttribute("x1","0"); grid.setAttribute("x2","320");
+    grid.setAttribute("y1", String(H-pad)); grid.setAttribute("y2", String(H-pad));
+    grid.setAttribute("stroke","rgba(127,127,127,0.25)");
+    svg.appendChild(grid);
+
+    // points
+    const pts = buckets.map((b,i)=>{
+      const x = pad + i*( (W-2*pad)/7 );
+      const y = (H-pad) - (b.hours/max)*(H-2*pad);
+      return {x,y, h:b.hours};
+    });
+
+    // area
+    const area = document.createElementNS("http://www.w3.org/2000/svg","path");
+    const dArea =
+      `M ${pts[0].x} ${H-pad} ` +
+      pts.map(p=>`L ${p.x} ${p.y}`).join(" ") +
+      ` L ${pts[pts.length-1].x} ${H-pad} Z`;
+    area.setAttribute("d", dArea);
+    area.setAttribute("fill", "rgba(31,111,235,0.15)");
+    svg.appendChild(area);
+
+    // line
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    const dLine = `M ${pts.map(p=>`${p.x} ${p.y}`).join(" L ")}`;
+    path.setAttribute("d", dLine);
+    path.setAttribute("fill","none");
+    path.setAttribute("stroke","rgba(31,111,235,0.85)");
+    path.setAttribute("stroke-width","2.5");
+    path.setAttribute("stroke-linecap","round");
+    path.setAttribute("stroke-linejoin","round");
+    svg.appendChild(path);
+
+    // dots
+    for(const p of pts){
+      const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      c.setAttribute("cx", String(p.x));
+      c.setAttribute("cy", String(p.y));
+      c.setAttribute("r", "3.2");
+      c.setAttribute("fill","rgba(31,111,235,0.95)");
+      svg.appendChild(c);
+    }
+
+    const last = buckets[buckets.length-1].hours;
+    $("trendLabel").textContent = `Letzte Woche: ${last.toFixed(1)}h · Max: ${max.toFixed(1)}h`;
+  }
+
+  function renderLogList(range){
+    const el = $("logList");
+    const logs = logsInRange(range).sort((a,b)=>a.date<b.date?1:-1);
+
+    if(!logs.length){
+      el.textContent = "Noch keine Einträge in diesem Zeitraum.";
+      return;
+    }
+
+    el.innerHTML = "";
+    for(const log of logs){
+      const row = document.createElement("div");
+      row.className = "logRow";
+
+      const left = document.createElement("div");
+      left.className = "logLeft";
+
+      const badge = log.type === "school" ? `<span class="badge">Schule</span>` : "";
+      left.innerHTML = `
+        <div class="logDate">${log.date} ${badge}</div>
+        <div class="logSub mono">${log.start || "—"} → ${log.end || "—"}</div>
+      `;
+
+      const right = document.createElement("div");
+      right.className = "logRight";
+
+      const hrs = ((log.workSeconds||0)/3600).toFixed(2);
+      right.innerHTML = `
+        <div class="mono logHours">${hrs}h</div>
+        <button class="btn btn--ghost btn--sm" type="button" data-del="${log.date}">Löschen</button>
+      `;
+
+      row.appendChild(left);
+      row.appendChild(right);
+      el.appendChild(row);
+    }
+
+    // attach delete handlers
+    el.querySelectorAll("[data-del]").forEach(btn=>{
+      btn.addEventListener("click", () => {
+        const date = btn.getAttribute("data-del");
+        if(confirm(`Eintrag ${date} löschen?`)){
+          deleteLog(date);
+        }
+      });
+    });
+  }
+
+  function renderStats(){
+    const range = $("statsRange").value;
+    const logs = logsInRange(range);
+
+    // streak is global (weekday-based), not filtered
+    $("kpiStreak").textContent = `${computeStreakWeekdays()} Tage`;
+
+    const sumSec = logs.reduce((a,l)=>a+(l.workSeconds||0),0);
+    $("kpiSum").textContent = `${(sumSec/3600).toFixed(1)}h`;
+
+    const starts = logs.map(l=>l.start).filter(v=>v && /^\d{2}:\d{2}$/.test(v));
+    const ends = logs.map(l=>l.end).filter(v=>v && /^\d{2}:\d{2}$/.test(v));
+    $("kpiAvg").textContent = `${meanTimeHM(starts)} / ${meanTimeHM(ends)}`;
+
+    renderHeatmapForCurrentMonth();
+    renderTrendLast8Weeks();
+    renderLogList(range);
+  }
+
+  // ---- export/import
+  function downloadText(filename, text, mime="text/plain"){
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportCSV(){
+    const header = ["date","type","start","end","work_hours","delta_hours","glide_account"];
+    const lines = [header.join(",")];
+
+    const logs = [...state.logs].sort((a,b)=>a.date.localeCompare(b.date));
+    for(const l of logs){
+      const row = [
+        l.date,
+        l.type || "work",
+        l.start || "",
+        l.end || "",
+        ((l.workSeconds||0)/3600).toFixed(2),
+        (l.deltaHours ?? "").toString(),
+        l.glideAccount ?? ""
+      ].map(v => `"${String(v).replaceAll('"','""')}"`);
+      lines.push(row.join(","));
+    }
+    downloadText(`zeit_logs_${isoFromDate(new Date())}.csv`, lines.join("\n"), "text/csv");
+  }
+
+  function exportJSON(){
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      app: "zeit",
+      version: 1,
+      data: state
+    };
+    downloadText(`zeit_backup_${isoFromDate(new Date())}.json`, JSON.stringify(payload, null, 2), "application/json");
+  }
+
+  async function importJSON(file){
+    const text = await file.text();
+    let obj;
+    try{ obj = JSON.parse(text); } catch { alert("Ungültige JSON-Datei."); return; }
+    const incoming = obj?.data;
+    if(!incoming){ alert("Keine Daten gefunden."); return; }
+
+    const ok = confirm("Importieren? (Das ersetzt deine aktuellen Daten)");
+    if(!ok) return;
+
+    Object.assign(state, incoming);
+    state.work = incoming.work || defaultTimer();
+    state.brk  = incoming.brk  || defaultTimer();
+    state.off  = incoming.off  || defaultTimer();
+    state.logs = Array.isArray(incoming.logs) ? incoming.logs : [];
+    state.undo = incoming.undo || null;
+
+    save();
+    applyUI();
+    render();
+    alert("Import fertig.");
+  }
+
+  // ---- apply UI
+  function renderNotifyBtn(){
+    $("btnNotifyToggle").textContent = `Notifications: ${state.notificationsEnabled ? "an" : "aus"}`;
+  }
+
+  function applyUI(){
+    document.body.dataset.theme = state.theme;
+    $("themeSel").value = state.theme;
+
+    $("dayStart").value = state.dayStart || "";
+    $("targetWork").value = state.targetWork || "07:00";
+    $("requiredBreak").value = state.requiredBreak || "00:45";
+    $("autoResume").checked = !!state.autoResume;
+
+    $("glideAccount").value = state.glideAccount || "";
+    $("goalType").value = state.goalType || "none";
+    $("goalValue").value = state.goalValue || "";
+    updateGoalUI();
+
+    renderNotifyBtn();
+    switchTab(state.tab || "zeit");
+
+    // show pending undo if exists
+    if(state.undo?.label){
+      showUndo(state.undo.label);
+    }
+  }
+
+  function readSetup(){
+    state.dayStart = $("dayStart").value;
+    state.targetWork = $("targetWork").value || "07:00";
+    state.requiredBreak = $("requiredBreak").value || "00:45";
+    state.autoResume = $("autoResume").checked;
+    state.glideAccount = $("glideAccount").value || "";
+    save();
+  }
+
+  // ---- render loop
   function render(){
     const now = new Date();
     $("bigClock").textContent = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
@@ -528,158 +1201,75 @@
 
     $("heroWork").textContent = formatHMS(w);
     $("heroSub").textContent = `Pause ${formatHMS(b)} · Unterbr. ${formatHMS(o)}`;
-    $("workStatus").textContent = state.work.status;
-    $("breakStatus").textContent = state.brk.status;
-
-    const end = plannedEnd();
-    if(end){
-      $("endTime").textContent = formatHM(end);
-      const rb = parseHHMM(state.requiredBreak) ?? 0;
-      const brCounted = Math.max(rb, b);
-      $("endSub").textContent = `Start ${state.dayStart || "—"} · Pause zählt ${formatHMS(brCounted)}`;
-    } else {
-      $("endTime").textContent = "—";
-      $("endSub").textContent = "Startzeit setzen";
-    }
+    $("statusText").textContent = statusLabel();
 
     scheduleBreakAuto();
     save();
   }
 
+  // ---- hooks
   function hook(){
-    $("tabNormal").addEventListener("click", ()=>switchTab("normal"));
-    $("tabMobi").addEventListener("click", ()=>switchTab("mobi"));
+    $("themeSel").addEventListener("change", () => setTheme($("themeSel").value));
 
-    $("themeSel").addEventListener("change", readUI);
+    $("tabZeit").addEventListener("click", ()=>switchTab("zeit"));
+    $("tabStats").addEventListener("click", ()=>switchTab("stats"));
 
-    ["dayStart","targetWork","requiredBreak","noGlide","glideAccount","autoResume","notifyOnBreak"].forEach(id=>{
-      $(id).addEventListener("input", readUI);
-      $(id).addEventListener("change", readUI);
+    $("btnStart").addEventListener("click", onStart);
+    $("btnPause").addEventListener("click", onPause);
+    $("btnStop").addEventListener("click", onStop);
+
+    $("btnFinishDay").addEventListener("click", ()=>{
+      $("finishResult").textContent = finishDay();
+      if(state.tab === "stats") renderStats();
     });
 
-    $("btnStartNow").addEventListener("click", startNowAndWork);
-    $("mobiStartNow").addEventListener("click", startNowAndWork);
-
-    // normal controls
-    $("workStart").addEventListener("click", ()=>{ stopTimer(state.brk); stopTimer(state.off); startTimer(state.work); save(); });
-    $("workPause").addEventListener("click", ()=>{ pauseTimer(state.work); save(); });
-    $("workStop").addEventListener("click", ()=>{ stopTimer(state.work); save(); });
-
-    // mobi controls (pause starts real break)
-    $("mobiWorkStart").addEventListener("click", ()=>{ stopTimer(state.brk); stopTimer(state.off); startTimer(state.work); save(); });
-    $("mobiPause").addEventListener("click", ()=>{
-      pauseTimer(state.work);
-      startTimer(state.brk);
-      save();
-      scheduleBreakAuto();
-    });
-    $("mobiStop").addEventListener("click", ()=>{
-      stopTimer(state.work);
-      stopTimer(state.brk);
-      stopTimer(state.off);
-      clearBreakAutoTimer();
-      save();
+    ["dayStart","targetWork","requiredBreak","autoResume","glideAccount"].forEach(id=>{
+      $(id).addEventListener("input", readSetup);
+      $(id).addEventListener("change", readSetup);
     });
 
-    $("btnEnableNotify").addEventListener("click", async ()=>{
-      const ok = await requestNotify();
-      if(ok){
-        state.notifyOnBreak = true;
-        $("notifyOnBreak").checked = true;
-        save();
-        notify("Notifications aktiv", "Funktioniert, solange die App läuft.");
-      }
-    });
+    $("btnNotifyToggle").addEventListener("click", toggleNotify);
 
-    $("btnFinishDay").addEventListener("click", ()=>{ $("finishResult").textContent = finishDay(); });
-    $("mobiFinish").addEventListener("click", ()=>{ $("mobiFinishResult").textContent = finishDay(); });
+    $("goalType").addEventListener("change", updateGoalUI);
+    $("goalValue").addEventListener("input", ()=>{ state.goalValue = $("goalValue").value; save(); });
+    $("btnCalcGoal").addEventListener("click", calcGoal);
 
-    $("btnCalcGoal").addEventListener("click", ()=>{
-      if(state.noGlide){ $("goalResult").textContent = "—"; return; }
-
-      const type = $("goalType").value; // delta|account
-      const v = parseDecHours($("goalValue").value);
-      if(!Number.isFinite(v)){ $("goalResult").textContent = "—"; return; }
-
-      const nowAcc = parseDecHours(state.glideAccount);
-      const needDelta = (type === "delta") ? v : (v - nowAcc);
-
-      const end = plannedEndForDelta(needDelta);
-      $("goalResult").textContent = end ? `Go-Time ${formatHM(end)}` : "— Startzeit/Soll setzen";
-    });
-
-    function applyBackdate(alsoStart){
-      const since = $("workBackdateSince").value;
-      const minsStr = $("workBackdateMinutes").value;
-      const now = new Date();
-
-      if(since){
-        const sec = parseHHMM(since);
-        if(sec===null){ $("backdateResult").textContent="—"; return; }
-        const diff = Math.max(0, (now.getTime() - todayAt(sec).getTime())/1000);
-        state.work.acc = diff;
-        state.work.status = alsoStart ? "running" : "paused";
-        state.work.lastStart = alsoStart ? Date.now() : null;
-        $("backdateResult").textContent = `OK (${formatHMS(diff)})`;
-        save();
-        return;
-      }
-
-      const mins = Number(minsStr);
-      if(Number.isFinite(mins) && mins >= 0){
-        state.work.acc = mins*60;
-        state.work.status = alsoStart ? "running" : "paused";
-        state.work.lastStart = alsoStart ? Date.now() : null;
-        $("backdateResult").textContent = `OK (${formatHMS(mins*60)})`;
-        save();
-        return;
-      }
-
-      $("backdateResult").textContent = "—";
-    }
     $("btnApplyBackdate").addEventListener("click", ()=>applyBackdate(false));
     $("btnApplyBackdateStart").addEventListener("click", ()=>applyBackdate(true));
 
-    $("btnCalcEntryMinusPause").addEventListener("click", ()=>{
-      const entry = $("entryTime").value;
-      const stop  = $("actualStopTime").value;
-      const pauseMin = Number($("pauseMinutes").value || 0);
+    $("btnCalcEntryMinusPause").addEventListener("click", calcEntryMinusPause);
 
-      const now = new Date();
-      const entrySec = entry ? parseHHMM(entry) : (now.getHours()*3600 + now.getMinutes()*60);
-      const stopSec  = stop  ? parseHHMM(stop)  : entrySec;
-
-      if(entrySec===null || stopSec===null || !Number.isFinite(pauseMin) || pauseMin < 0){
-        $("entryMinusPauseResult").textContent = "—";
-        return;
+    $("statsRange").addEventListener("change", renderStats);
+    $("btnSchoolToday").addEventListener("click", ()=>{
+      if(confirm("Berufsschule für heute eintragen? (setzt 7:00h für heute)")){
+        setSchoolToday();
       }
-      const base = todayAt(stopSec);
-      const out = new Date(base.getTime() - pauseMin*60*1000);
-      $("entryMinusPauseResult").textContent = `${formatHM(out)}`;
     });
 
-    $("btnCalcAgo").addEventListener("click", ()=>{
-      const base = $("baseTime").value;
-      const mins = Number($("minutesAgo").value);
-      if(!Number.isFinite(mins) || mins < 0){ $("agoResult").textContent="—"; return; }
-
-      let baseDate;
-      if(base){
-        const sec = parseHHMM(base);
-        if(sec===null){ $("agoResult").textContent="—"; return; }
-        baseDate = todayAt(sec);
-      } else {
-        baseDate = new Date();
-      }
-      const d = new Date(baseDate.getTime() - mins*60*1000);
-      $("agoResult").textContent = `${formatHM(d)}`;
+    $("btnExportCSV").addEventListener("click", exportCSV);
+    $("btnExportJSON").addEventListener("click", exportJSON);
+    $("importFile").addEventListener("change", async () => {
+      const f = $("importFile").files?.[0];
+      if(f) await importJSON(f);
+      $("importFile").value = "";
     });
 
     $("btnResetAll").addEventListener("click", ()=>{
-      if(!confirm("Reset?")) return;
+      const ok = confirm("Alles löschen? (Logs + Einstellungen + heutiger Timer)");
+      if(!ok) return;
       localStorage.removeItem(KEY);
       location.reload();
     });
+
+    $("btnUndo").addEventListener("click", applyUndo);
+    $("btnUndoClose").addEventListener("click", ()=>{
+      state.undo = null; save(); hideUndo();
+    });
+  }
+
+  // SW register (keep your sw.js)
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js?v=20260227").catch(()=>{});
   }
 
   load();
