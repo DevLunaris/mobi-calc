@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Homeoffice Logger</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="top__left">
+      <div class="brand">Homeoffice Logger</div>
+      <div class="bigclock" id="bigClock">--:--:--</div>
+      <div class="subline" id="todayLine">—</div>
+    </div>
+
+    <div class="top__right">
+      <div class="pills">
+        <div class="pill">
+          <div class="pill__label">Arbeit</div>
+          <div class="pill__value mono" id="pillWork">00:00:00</div>
+        </div>
+        <div class="pill">
+          <div class="pill__label">Pause</div>
+          <div class="pill__value mono" id="pillBreak">00:00:00</div>
+        </div>
+        <div class="pill">
+          <div class="pill__label">Unterbr.</div>
+          <div class="pill__value mono" id="pillOff">00:00:00</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card__title">Setup</div>
+
+      <div class="grid">
+        <label class="field">
+          <span>Startzeit</span>
+          <input type="time" id="dayStart" />
+        </label>
+
+        <label class="field">
+          <span>Soll-Arbeitszeit</span>
+          <input type="time" id="targetWork" value="07:00" />
+          <small>Nur Arbeitszeit (ohne Pause).</small>
+        </label>
+
+        <label class="field">
+          <span>Pflichtpause</span>
+          <input type="time" id="requiredBreak" value="00:45" />
+          <small>Standard 00:45 (änderbar).</small>
+        </label>
+
+        <div class="field">
+          <span>Optionen</span>
+          <div class="row">
+            <button class="btn btn--ghost" id="btnStartNow">Start = jetzt</button>
+            <label class="check">
+              <input type="checkbox" id="noGlide" />
+              <span>Keine Gleitzeit</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid glide" id="glideBox">
+        <label class="field">
+          <span>Gleitzeitkonto aktuell (h)</span>
+          <input type="text" inputmode="decimal" id="glideAccount" placeholder="0.51 oder 0,51" />
+          <small>Komma oder Punkt ist egal.</small>
+        </label>
+
+        <label class="field">
+          <span>Gleitzeit nach Uhrzeit (heute)</span>
+          <input type="time" id="glideAtTime" />
+          <small>Rechnet dein Konto, wenn du bis zu dieser Uhrzeit weiterarbeitest (ohne zusätzliche Pausen/Unterbr.).</small>
+        </label>
+
+        <div class="field">
+          <span>&nbsp;</span>
+          <button class="btn btn--primary" id="btnCalcGlide">Berechnen</button>
+          <small class="mono" id="glideResult">—</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="twoCol">
+      <section class="card">
+        <div class="card__title">Arbeit</div>
+
+        <div class="statusline">
+          <div class="status">
+            Status: <b id="workStatus">stopped</b>
+          </div>
+          <div class="mono">Heute: <b id="workToday">00:00:00</b></div>
+        </div>
+
+        <div class="row">
+          <button class="btn btn--good" id="workStart">Start</button>
+          <button class="btn btn--warn" id="workPause">Pause</button>
+          <button class="btn btn--danger" id="workStop">Stop</button>
+          <button class="btn btn--ghost right" id="workReset" title="setzt nur den Arbeitstimer zurück">Reset</button>
+        </div>
+
+        <div class="splitline"></div>
+
+        <div class="card__subtitle">Nachtragen (falls Start vergessen)</div>
+        <div class="grid grid--3">
+          <label class="field">
+            <span>Ich arbeite seit</span>
+            <input type="time" id="workBackdateSince" />
+            <small>Setzt Arbeit so, als hätte sie seit dieser Uhrzeit gezählt.</small>
+          </label>
+
+          <label class="field">
+            <span>Oder: schon gearbeitet (Min)</span>
+            <input type="number" min="0" step="1" id="workBackdateMinutes" placeholder="z.B. 30" />
+            <small>Setzt nur die Minuten als bisherige Arbeitszeit.</small>
+          </label>
+
+          <div class="field">
+            <span>&nbsp;</span>
+            <div class="row">
+              <button class="btn btn--primary" id="btnApplyBackdate">Übernehmen</button>
+              <button class="btn btn--ghost" id="btnApplyBackdateStart">Übernehmen & Start</button>
+            </div>
+            <small class="mono" id="backdateResult">—</small>
+          </div>
+        </div>
+
+        <div class="hint">
+          Wenn du <b>Arbeit pausierst</b> und <b>keine Pause startest</b>, wird automatisch <b>Unterbrechung</b> getrackt
+          und die <b>Endzeit</b> verschiebt sich entsprechend.
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__title">Pause / Unterbrechung</div>
+
+        <div class="statusline">
+          <div class="status">
+            Status: <b id="breakStatus">stopped</b>
+          </div>
+          <div class="mono">Heute: <b id="breakToday">00:00:00</b></div>
+        </div>
+
+        <div class="row">
+          <button class="btn btn--good" id="breakStart">Start</button>
+          <button class="btn btn--warn" id="breakPause">Pause</button>
+          <button class="btn btn--danger" id="breakStop">Stop</button>
+          <button class="btn btn--ghost right" id="breakReset" title="setzt nur den Pausentimer zurück">Reset</button>
+        </div>
+
+        <div class="hint">
+          Pause ist getrennt von Arbeit (Absicht), damit nichts automatisch gestartet wird.
+        </div>
+      </section>
+    </section>
+
+    <section class="card">
+      <div class="card__title">Endzeit & Tagesrechnung</div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi__label">Geplantes Tagesende (aktuell)</div>
+          <div class="kpi__value mono" id="kpiEndTime">—</div>
+          <div class="kpi__sub" id="kpiEndSub">—</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Noch zu arbeiten</div>
+          <div class="kpi__value mono" id="kpiRemaining">—</div>
+          <div class="kpi__sub">bezogen auf Soll-Arbeitszeit</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">+1h / -1h (Endzeit)</div>
+          <div class="kpi__value mono" id="kpiPlusMinus">—</div>
+          <div class="kpi__sub">Aufbau / Abbau</div>
+        </div>
+      </div>
+
+      <div class="hint">
+        Endzeit = <b>Start + Soll-Arbeit + max(Pflichtpause, Pause genommen) + Unterbrechungen</b>.
+        Unterbrechung läuft automatisch, wenn <b>Arbeit nicht läuft</b> und <b>Pause nicht läuft</b>.
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__title">Rechner (für mobiles Arbeiten)</div>
+
+      <div class="card__subtitle">Zeit minus Pause – mit Eintragzeit & tatsächlicher Stoppzeit</div>
+      <div class="calcGrid">
+        <label class="field">
+          <span>Eintrag-Uhrzeit (z.B. jetzt 15:05)</span>
+          <input type="time" id="entryTime" />
+          <small>Wenn leer: nimmt „jetzt“.</small>
+        </label>
+
+        <label class="field">
+          <span>Tatsächlich aufgehört um (z.B. 15:01)</span>
+          <input type="time" id="actualStopTime" />
+          <small>Wenn leer: nimmt Eintragzeit.</small>
+        </label>
+
+        <label class="field">
+          <span>Pause-Minuten (manuell)</span>
+          <input type="number" min="0" step="1" id="pauseMinutes" placeholder="z.B. 30" />
+          <small>Wird von der tatsächlichen Stoppzeit abgezogen.</small>
+        </label>
+
+        <div class="field">
+          <span>&nbsp;</span>
+          <button class="btn btn--primary" id="btnCalcEntryMinusPause">Ausrechnen</button>
+          <small class="mono" id="entryMinusPauseResult">—</small>
+        </div>
+      </div>
+
+      <div class="splitline"></div>
+
+      <div class="card__subtitle">Wie spät war es vor … Minuten? (optional mit Basis-Uhrzeit)</div>
+      <div class="calcGrid">
+        <label class="field">
+          <span>Basis-Uhrzeit (optional)</span>
+          <input type="time" id="baseTime" />
+          <small>Wenn leer: nimmt „jetzt“.</small>
+        </label>
+
+        <label class="field">
+          <span>Minuten zurück</span>
+          <input type="number" min="0" step="1" id="minutesAgo" placeholder="z.B. 45" />
+        </label>
+
+        <div class="field">
+          <span>&nbsp;</span>
+          <button class="btn btn--ghost" id="btnCalcAgo">Berechnen</button>
+          <small class="mono" id="agoResult">—</small>
+        </div>
+        <div></div>
+      </div>
+
+      <div class="hint">
+        Beispiel: Eintrag 15:05, aufgehört 15:01, Pause 30 → Ergebnis = <b>15:01 − 30 min</b>.
+      </div>
+    </section>
+
+    <footer class="footer">
+      <button class="btn btn--ghost" id="btnResetAll">Alles zurücksetzen</button>
+      <div class="footer__note">Speichert automatisch im Browser (localStorage).</div>
+    </footer>
+  </main>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const pad2 = (n) => String(n).padStart(2,'0');
+
+  function formatHMS(sec){
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec/3600);
+    const m = Math.floor((sec%3600)/60);
+    const s = sec%60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  }
+
+  function formatHMfromDate(d){
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  }
+
+  function parseTimeToSecondsHHMM(str){
+    if(!str || !/^\d{2}:\d{2}$/.test(str)) return null;
+    const [h,m] = str.split(':').map(Number);
+    return h*3600 + m*60;
+  }
+
+  function todayAtSeconds(sec){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return new Date(d.getTime() + sec*1000);
+  }
+
+  function parseDecimalHours(str){
+    if(!str) return 0;
+    const cleaned = String(str).trim().replace(',', '.');
+    const v = Number(cleaned);
+    return Number.isFinite(v) ? v : 0;
+  }
+
+  // ---------- persistent state ----------
+  const STORAGE_KEY = "homeoffice_logger_v3";
+
+  function newTimer(){
+    return { status: "stopped", acc: 0, lastStart: null };
+  }
+
+  const state = {
+    dayStart: "",
+    targetWork: "07:00",
+    requiredBreak: "00:45",
+    noGlide: false,
+    glideAccount: "",
+
+    work: newTimer(),
+    brk: newTimer(),
+    off: newTimer(),
+  };
+
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  function load(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    try{
+      const obj = JSON.parse(raw);
+      Object.assign(state, obj);
+      state.work = obj.work || newTimer();
+      state.brk  = obj.brk  || newTimer();
+      state.off  = obj.off  || newTimer();
+    }catch(e){}
+  }
+
+  // ---------- timer core ----------
+  function isRunning(t){ return t.status === "running" && typeof t.lastStart === "number"; }
+
+  function startTimer(t){
+    if(isRunning(t)) return;
+    t.status = "running";
+    t.lastStart = Date.now();
+  }
+
+  function pauseTimer(t){
+    if(isRunning(t)){
+      const now = Date.now();
+      t.acc += (now - t.lastStart)/1000;
+    }
+    t.status = "paused";
+    t.lastStart = null;
+  }
+
+  function stopTimer(t){
+    if(isRunning(t)){
+      const now = Date.now();
+      t.acc += (now - t.lastStart)/1000;
+    }
+    t.status = "stopped";
+    t.lastStart = null;
+  }
+
+  function resetTimer(t){
+    t.status = "stopped";
+    t.acc = 0;
+    t.lastStart = null;
+  }
+
+  function currentSeconds(t){
+    let s = t.acc;
+    if(isRunning(t)) s += (Date.now() - t.lastStart)/1000;
+    return s;
+  }
+
+  // Auto-Off: läuft, wenn Startzeit erreicht ist und weder Arbeit noch Pause laufen.
+  function shouldOffRun(){
+    const ds = parseTimeToSecondsHHMM(state.dayStart);
+    if(ds === null) return false;
+    const startDate = todayAtSeconds(ds);
+    if(Date.now() < startDate.getTime()) return false;
+    return !isRunning(state.work) && !isRunning(state.brk);
+  }
+
+  function syncOff(){
+    const want = shouldOffRun();
+    const running = isRunning(state.off);
+    if(want && !running) startTimer(state.off);
+    if(!want && running) pauseTimer(state.off);
+  }
+
+  // ---------- calculations ----------
+  function getProjectedEndDate(){
+    const dsSec = parseTimeToSecondsHHMM(state.dayStart);
+    const twSec = parseTimeToSecondsHHMM(state.targetWork);
+    const rbSec = parseTimeToSecondsHHMM(state.requiredBreak);
+    if(dsSec === null || twSec === null || rbSec === null) return null;
+
+    const start = todayAtSeconds(dsSec);
+    const breakTaken = currentSeconds(state.brk);
+    const offTaken = currentSeconds(state.off);
+    const breakCounted = Math.max(rbSec, breakTaken);
+
+    return new Date(start.getTime() + (twSec + breakCounted + offTaken) * 1000);
+  }
+
+  function getRemainingWorkSeconds(){
+    const twSec = parseTimeToSecondsHHMM(state.targetWork);
+    if(twSec === null) return null;
+    const worked = currentSeconds(state.work);
+    return Math.max(0, twSec - worked);
+  }
+
+  function calcGlideAtTime(){
+    const dsSec = parseTimeToSecondsHHMM(state.dayStart);
+    const twSec = parseTimeToSecondsHHMM(state.targetWork);
+    const rbSec = parseTimeToSecondsHHMM(state.requiredBreak);
+    const tSec  = parseTimeToSecondsHHMM($("glideAtTime").value);
+
+    if(dsSec === null || twSec === null || rbSec === null || tSec === null){
+      return { ok:false, msg:"Bitte Startzeit + Ziel-Uhrzeit setzen." };
+    }
+
+    const start = todayAtSeconds(dsSec);
+    const targetTime = todayAtSeconds(tSec);
+
+    if(targetTime.getTime() <= start.getTime()){
+      return { ok:false, msg:"Ziel-Uhrzeit liegt vor Startzeit." };
+    }
+
+    const now = new Date();
+
+    const workedSoFar = currentSeconds(state.work);
+    const breakSoFar = currentSeconds(state.brk);
+    const offSoFar = currentSeconds(state.off);
+
+    // Annahme: ab jetzt bis targetTime wird durchgearbeitet (keine weitere Pause/Off)
+    const extraWork = Math.max(0, (targetTime.getTime() - now.getTime())/1000);
+
+    // Gleitzeit Δ heute basiert nur auf (Arbeit - Soll), nicht auf Pause/Off
+    const totalWorkAssumed = workedSoFar + extraWork;
+    const netVsTarget = totalWorkAssumed - twSec;
+
+    const glideNowHours = parseDecimalHours(state.glideAccount);
+    const glideAfterHours = glideNowHours + (netVsTarget/3600);
+
+    const sign = glideAfterHours >= 0 ? "+" : "";
+    const delta = netVsTarget/3600;
+    return {
+      ok:true,
+      msg:`Konto dann: ${sign}${glideAfterHours.toFixed(2)} h (Δ heute: ${(delta>=0?"+":"")}${delta.toFixed(2)} h)`
+    };
+  }
+
+  // ---------- UI ----------
+  function applyStateToUI(){
+    $("dayStart").value = state.dayStart || "";
+    $("targetWork").value = state.targetWork || "07:00";
+    $("requiredBreak").value = state.requiredBreak || "00:45";
+    $("noGlide").checked = !!state.noGlide;
+    $("glideAccount").value = state.glideAccount || "";
+
+    // zuverlässig ein/ausblenden (und nicht “kaputt speichern”)
+    $("glideBox").style.display = state.noGlide ? "none" : "grid";
+    $("glideAtTime").disabled = !!state.noGlide;
+  }
+
+  function readUIToState(){
+    state.dayStart = $("dayStart").value;
+    state.targetWork = $("targetWork").value || "07:00";
+    state.requiredBreak = $("requiredBreak").value || "00:45";
+    state.noGlide = $("noGlide").checked;
+    state.glideAccount = $("glideAccount").value;
+  }
+
+  function render(){
+    const now = new Date();
+    $("bigClock").textContent = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+    $("todayLine").textContent = now.toLocaleDateString("de-DE", { weekday:"long", year:"numeric", month:"2-digit", day:"2-digit" });
+
+    syncOff();
+
+    const workSec = currentSeconds(state.work);
+    const breakSec = currentSeconds(state.brk);
+    const offSec = currentSeconds(state.off);
+
+    $("workToday").textContent = formatHMS(workSec);
+    $("breakToday").textContent = formatHMS(breakSec);
+
+    $("pillWork").textContent = formatHMS(workSec);
+    $("pillBreak").textContent = formatHMS(breakSec);
+    $("pillOff").textContent = formatHMS(offSec);
+
+    $("workStatus").textContent = state.work.status;
+    $("breakStatus").textContent = state.brk.status;
+
+    const end = getProjectedEndDate();
+    if(end){
+      $("kpiEndTime").textContent = `${formatHMfromDate(end)}`;
+      const twSec = parseTimeToSecondsHHMM(state.targetWork) ?? 0;
+      const rbSec = parseTimeToSecondsHHMM(state.requiredBreak) ?? 0;
+      const breakCounted = Math.max(rbSec, breakSec);
+      $("kpiEndSub").textContent =
+        `Start ${state.dayStart || "—"} · Soll ${formatHMS(twSec)} · Pause zählt ${formatHMS(breakCounted)} · Unterbr. ${formatHMS(offSec)}`;
+      const plus = new Date(end.getTime() + 3600*1000);
+      const minus = new Date(end.getTime() - 3600*1000);
+      $("kpiPlusMinus").textContent = `+1h → ${formatHMfromDate(plus)} | -1h → ${formatHMfromDate(minus)}`;
+    }else{
+      $("kpiEndTime").textContent = "—";
+      $("kpiEndSub").textContent = "Startzeit/Sollzeit setzen";
+      $("kpiPlusMinus").textContent = "—";
+    }
+
+    const rem = getRemainingWorkSeconds();
+    $("kpiRemaining").textContent = rem === null ? "—" : formatHMS(rem);
+
+    save();
+  }
+
+  function hook(){
+    ["dayStart","targetWork","requiredBreak","glideAccount","noGlide","glideAtTime"].forEach(id=>{
+      $(id).addEventListener("input", ()=>{
+        readUIToState();
+        applyStateToUI();
+        save();
+      });
+      $(id).addEventListener("change", ()=>{
+        readUIToState();
+        applyStateToUI();
+        save();
+      });
+    });
+
+    $("btnStartNow").addEventListener("click", ()=>{
+      const now = new Date();
+      $("dayStart").value = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+      readUIToState();
+      save();
+    });
+
+    // work
+    $("workStart").addEventListener("click", ()=>{ startTimer(state.work); save(); });
+    $("workPause").addEventListener("click", ()=>{ pauseTimer(state.work); save(); });
+    $("workStop").addEventListener("click", ()=>{ stopTimer(state.work); save(); });
+    $("workReset").addEventListener("click", ()=>{ resetTimer(state.work); save(); });
+
+    // break
+    $("breakStart").addEventListener("click", ()=>{ startTimer(state.brk); save(); });
+    $("breakPause").addEventListener("click", ()=>{ pauseTimer(state.brk); save(); });
+    $("breakStop").addEventListener("click", ()=>{ stopTimer(state.brk); save(); });
+    $("breakReset").addEventListener("click", ()=>{ resetTimer(state.brk); save(); });
+
+    // glide
+    $("btnCalcGlide").addEventListener("click", ()=>{
+      if(state.noGlide){
+        $("glideResult").textContent = "— Keine Gleitzeit aktiv";
+        return;
+      }
+      const r = calcGlideAtTime();
+      $("glideResult").textContent = r.ok ? r.msg : `— ${r.msg}`;
+    });
+
+    // backdate (missed start)
+    function applyBackdate(alsoStart){
+      const since = $("workBackdateSince").value;
+      const minsStr = $("workBackdateMinutes").value;
+
+      const now = new Date();
+
+      // Priority: "since" if provided; otherwise minutes.
+      if(since){
+        const sec = parseTimeToSecondsHHMM(since);
+        if(sec === null){
+          $("backdateResult").textContent = "— Ungültige Uhrzeit";
+          return;
+        }
+        const sinceDate = todayAtSeconds(sec);
+        const diffSec = Math.max(0, (now.getTime() - sinceDate.getTime())/1000);
+
+        state.work.acc = diffSec;
+        state.work.status = alsoStart ? "running" : "paused";
+        state.work.lastStart = alsoStart ? Date.now() : null;
+
+        $("backdateResult").textContent = `OK: Arbeit auf ${formatHMS(diffSec)} gesetzt (seit ${since})`;
+        save();
+        return;
+      }
+
+      const mins = Number(minsStr);
+      if(Number.isFinite(mins) && mins >= 0){
+        const diffSec = mins * 60;
+        state.work.acc = diffSec;
+        state.work.status = alsoStart ? "running" : "paused";
+        state.work.lastStart = alsoStart ? Date.now() : null;
+
+        $("backdateResult").textContent = `OK: Arbeit auf ${formatHMS(diffSec)} gesetzt`;
+        save();
+        return;
+      }
+
+      $("backdateResult").textContent = "— Bitte „seit“ oder Minuten eintragen";
+    }
+
+    $("btnApplyBackdate").addEventListener("click", ()=>applyBackdate(false));
+    $("btnApplyBackdateStart").addEventListener("click", ()=>applyBackdate(true));
+
+    // calculator: entry - pause (with actual stop)
+    $("btnCalcEntryMinusPause").addEventListener("click", ()=>{
+      const entry = $("entryTime").value;
+      const stop  = $("actualStopTime").value;
+      const pauseMin = Number($("pauseMinutes").value || 0);
+
+      const now = new Date();
+      const entrySec = entry ? parseTimeToSecondsHHMM(entry) : (now.getHours()*3600 + now.getMinutes()*60);
+      const stopSec  = stop  ? parseTimeToSecondsHHMM(stop)  : entrySec;
+
+      if(entrySec === null || stopSec === null || !Number.isFinite(pauseMin) || pauseMin < 0){
+        $("entryMinusPauseResult").textContent = "— Ungültige Eingabe";
+        return;
+      }
+
+      // take stop time as the true end, then subtract pause minutes
+      const base = todayAtSeconds(stopSec);
+      const out = new Date(base.getTime() - pauseMin*60*1000);
+      $("entryMinusPauseResult").textContent =
+        `Tatsächlich ${pad2(base.getHours())}:${pad2(base.getMinutes())} − ${pauseMin} min = ${pad2(out.getHours())}:${pad2(out.getMinutes())}`;
+    });
+
+    // calculator: minutes ago with optional base time
+    $("btnCalcAgo").addEventListener("click", ()=>{
+      const base = $("baseTime").value;
+      const mins = Number($("minutesAgo").value);
+
+      if(!Number.isFinite(mins) || mins < 0){ $("agoResult").textContent = "—"; return; }
+
+      let baseDate;
+      if(base){
+        const sec = parseTimeToSecondsHHMM(base);
+        if(sec === null){ $("agoResult").textContent = "— Ungültige Basis-Uhrzeit"; return; }
+        baseDate = todayAtSeconds(sec);
+      } else {
+        baseDate = new Date();
+      }
+
+      const d = new Date(baseDate.getTime() - mins*60*1000);
+      $("agoResult").textContent = `Vor ${mins} min: ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    });
+
+    // reset all
+    $("btnResetAll").addEventListener("click", ()=>{
+      if(!confirm("Wirklich alles zurücksetzen? (Timer + Eingaben)")) return;
+      localStorage.removeItem(STORAGE_KEY);
+
+      state.dayStart = "";
+      state.targetWork = "07:00";
+      state.requiredBreak = "00:45";
+      state.noGlide = false;
+      state.glideAccount = "";
+      state.work = newTimer();
+      state.brk = newTimer();
+      state.off = newTimer();
+
+      applyStateToUI();
+      $("glideResult").textContent = "—";
+      $("agoResult").textContent = "—";
+      $("entryMinusPauseResult").textContent = "—";
+      $("backdateResult").textContent = "—";
+      save();
+    });
+  }
+
+  load();
+  applyStateToUI();
+  hook();
+  render();
+  setInterval(render, 250);
+})();
+</script>
+</body>
+</html>
